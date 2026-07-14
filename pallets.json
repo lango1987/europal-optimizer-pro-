@@ -1,1 +1,33 @@
+/*
+=========================================
+ Europal Optimizer Pro
+ Berechnungen
+=========================================
+*/
 
+function calculateLayers(maxHeight, boxHeight, palletHeight) {
+
+    return Math.floor((maxHeight - palletHeight) / boxHeight);
+
+}
+
+function calculateTotal(cartonsPerLayer, layers) {
+
+    return cartonsPerLayer * layers;
+
+}
+
+function calculateUtilization(palletLength, palletWidth, boxLength, boxWidth, cartons) {
+
+    const palletArea = palletLength * palletWidth;
+    const usedArea = boxLength * boxWidth * cartons;
+
+    return Number(((usedArea / palletArea) * 100).toFixed(1));
+
+}
+
+function calculateWeight(weightPerBox, cartons) {
+
+    return Number((weightPerBox * cartons).toFixed(2));
+
+}
