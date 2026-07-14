@@ -2,8 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  Canvas
- Version 6.0
- 90 Grad Wechsellagen
+ Version 7.0
+ Längsseiten-Pfeil
 ==================================================
 */
 
@@ -14,10 +14,8 @@ function drawVariant(
     pallet
 ){
 
-
     const canvas =
         document.getElementById(canvasId);
-
 
 
     if(!canvas){
@@ -27,24 +25,16 @@ function drawVariant(
     }
 
 
-
-
     const ctx =
         canvas.getContext("2d");
 
 
 
-
     ctx.clearRect(
-
         0,
-
         0,
-
         canvas.width,
-
         canvas.height
-
     );
 
 
@@ -78,7 +68,6 @@ function drawVariant(
 
 
 
-
     if(currentView === "layer1"){
 
 
@@ -98,7 +87,6 @@ function drawVariant(
         return;
 
     }
-
 
 
 
@@ -129,8 +117,6 @@ function drawVariant(
 
 
 
-
-
     drawTopView(
 
         ctx,
@@ -142,6 +128,7 @@ function drawVariant(
         0
 
     );
+
 
 }
 
@@ -201,6 +188,7 @@ function drawTopView(
 
 
 
+
     drawTopPallet(
 
         ctx,
@@ -252,9 +240,7 @@ function drawTopView(
 
             box.length * scale,
 
-            box.width * scale,
-
-            box.rotation
+            box.width * scale
 
         );
 
@@ -265,6 +251,7 @@ function drawTopView(
 
 
 }
+
 
 
 
@@ -311,7 +298,6 @@ function drawTopPallet(
 
 
 
-
     ctx.strokeStyle =
         COLORS.palletDark;
 
@@ -340,13 +326,15 @@ function drawTopPallet(
  Europal Optimizer Pro
  Canvas
  Teil 2
- Karton Draufsicht
+ Karton Darstellung
 ==================================================
 */
 
 
+
 // ======================================
-// Karton oben zeichnen
+// Karton Draufsicht
+// Pfeil folgt längerer Seite
 // ======================================
 
 
@@ -360,16 +348,18 @@ function drawTopBox(
 
     w,
 
-    h,
-
-    rotation
+    h
 
 ){
+
 
 
     ctx.save();
 
 
+
+
+    // Kartonfläche
 
 
     ctx.fillStyle =
@@ -418,8 +408,9 @@ function drawTopBox(
 
 
 
+
     // ==================================
-    // Ausrichtung anzeigen
+    // Richtung längere Seite
     // ==================================
 
 
@@ -437,18 +428,24 @@ function drawTopBox(
 
 
 
+    if(w >= h){
 
-    // 90 Grad gedreht
 
-    if(rotation === 90){
+
+        // Länge horizontal
+
+
+
+        const cy =
+            y + h / 2;
 
 
 
         ctx.moveTo(
 
-            x + w/2,
+            x + 15,
 
-            y + h - 15
+            cy
 
         );
 
@@ -456,32 +453,31 @@ function drawTopBox(
 
         ctx.lineTo(
 
-            x + w/2,
+            x + w - 15,
 
-            y + 15
+            cy
 
         );
 
 
 
+        // Pfeilspitze
 
-
-        // Spitze
 
         ctx.moveTo(
 
-            x+w/2,
+            x+w-15,
 
-            y+15
+            cy
 
         );
 
 
         ctx.lineTo(
 
-            x+w/2-6,
+            x+w-30,
 
-            y+28
+            cy-8
 
         );
 
@@ -489,40 +485,43 @@ function drawTopBox(
 
         ctx.moveTo(
 
-            x+w/2,
+            x+w-15,
 
-            y+15
+            cy
 
         );
 
 
         ctx.lineTo(
 
-            x+w/2+6,
+            x+w-30,
 
-            y+28
+            cy+8
 
         );
 
 
 
     }
-
-
-
-
-
-    // normale Lage
 
     else{
 
 
 
+        // Länge vertikal
+
+
+
+        const cx =
+            x + w / 2;
+
+
+
         ctx.moveTo(
 
-            x+15,
+            cx,
 
-            y+h/2
+            y+h-15
 
         );
 
@@ -530,32 +529,32 @@ function drawTopBox(
 
         ctx.lineTo(
 
-            x+w-15,
+            cx,
 
-            y+h/2
+            y+15
 
         );
 
 
 
+        // Pfeilspitze oben
 
 
-        // Spitze
 
         ctx.moveTo(
 
-            x+w-15,
+            cx,
 
-            y+h/2
+            y+15
 
         );
 
 
         ctx.lineTo(
 
-            x+w-28,
+            cx-8,
 
-            y+h/2-6
+            y+30
 
         );
 
@@ -563,24 +562,25 @@ function drawTopBox(
 
         ctx.moveTo(
 
-            x+w-15,
+            cx,
 
-            y+h/2
+            y+15
 
         );
 
 
         ctx.lineTo(
 
-            x+w-28,
+            cx+8,
 
-            y+h/2+6
+            y+30
 
         );
 
 
 
     }
+
 
 
 
@@ -638,7 +638,6 @@ function drawIsometric(
 
 
 
-
     // Palette zuerst
 
     drawIsoPallet(
@@ -660,6 +659,7 @@ function drawIsometric(
 
 
 
+
     // Kartons sortieren
 
     const boxes =
@@ -670,27 +670,24 @@ function drawIsometric(
     boxes.sort((a,b)=>{
 
 
-        return (
-
+        const da =
             a.x +
             a.y +
-            a.z
+            a.z;
 
-        )
 
-        -
 
-        (
-
+        const db =
             b.x +
             b.y +
-            b.z
+            b.z;
 
-        );
+
+
+        return da - db;
 
 
     });
-
 
 
 
@@ -718,6 +715,7 @@ function drawIsometric(
 
 
 
+
         drawIsoBox(
 
             ctx,
@@ -730,9 +728,7 @@ function drawIsometric(
 
             box.width * scale,
 
-            box.height * scale,
-
-            box.rotation
+            box.height * scale
 
         );
 
@@ -750,9 +746,8 @@ function drawIsometric(
 
 
 
-
 // ======================================
-// Koordinaten umwandeln
+// Weltkoordinaten -> ISO
 // ======================================
 
 
@@ -775,7 +770,9 @@ function isoConvert(
 
 
 
+
     return {
+
 
 
         x:
@@ -824,6 +821,7 @@ function isoConvert(
     };
 
 
+
 }
 /*
 ==================================================
@@ -852,12 +850,9 @@ function drawIsoBox(
 
     w,
 
-    h,
-
-    rotation
+    h
 
 ){
-
 
 
     const height =
@@ -866,7 +861,9 @@ function drawIsoBox(
 
 
 
+
     // Schatten
+
 
     ctx.fillStyle =
         COLORS.shadow;
@@ -874,6 +871,7 @@ function drawIsoBox(
 
 
     ctx.beginPath();
+
 
 
     ctx.moveTo(
@@ -885,6 +883,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x+l-w,
@@ -892,6 +891,7 @@ function drawIsoBox(
         y+l/2+w/2+height
 
     );
+
 
 
     ctx.lineTo(
@@ -903,6 +903,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x,
@@ -910,6 +911,7 @@ function drawIsoBox(
         y+height
 
     );
+
 
 
     ctx.closePath();
@@ -924,7 +926,10 @@ function drawIsoBox(
 
 
 
+    // =========================
     // Oberseite
+    // =========================
+
 
     ctx.fillStyle =
         COLORS.boxTop;
@@ -994,8 +999,10 @@ function drawIsoBox(
 
 
 
-
+    // =========================
     // Vorderseite
+    // =========================
+
 
     ctx.fillStyle =
         COLORS.boxFront;
@@ -1060,7 +1067,10 @@ function drawIsoBox(
 
 
 
+    // =========================
     // Seite
+    // =========================
+
 
     ctx.fillStyle =
         COLORS.boxSide;
@@ -1123,79 +1133,7 @@ function drawIsoBox(
 
 
 
-
-
-
-    // Richtung anzeigen
-
-    ctx.strokeStyle =
-        "#1976D2";
-
-
-    ctx.lineWidth = 2;
-
-
-
-    ctx.beginPath();
-
-
-
-
-
-    if(rotation === 90){
-
-
-        ctx.moveTo(
-
-            x+l/2,
-
-            y+10
-
-        );
-
-
-        ctx.lineTo(
-
-            x+l/2,
-
-            y+w/2
-
-        );
-
-
-    }
-
-    else{
-
-
-        ctx.moveTo(
-
-            x+15,
-
-            y+w/2
-
-        );
-
-
-        ctx.lineTo(
-
-            x+l-15,
-
-            y+10
-
-        );
-
-
-    }
-
-
-
-    ctx.stroke();
-
-
-
 }
-
 
 
 
@@ -1224,10 +1162,13 @@ function drawIsoPallet(
 ){
 
 
-
     const h = 20;
 
 
+
+
+
+    // Oberfläche
 
 
     ctx.fillStyle =
@@ -1242,10 +1183,6 @@ function drawIsoPallet(
 
     ctx.lineWidth = 2;
 
-
-
-
-    // Oberfläche
 
 
     ctx.beginPath();
@@ -1299,7 +1236,6 @@ function drawIsoPallet(
     ctx.fill();
 
     ctx.stroke();
-
 
 
 
@@ -1373,8 +1309,7 @@ function drawIsoPallet(
 
 
 
-
-    // Rechte Seite
+    // Seite
 
 
     ctx.fillStyle =
@@ -1475,6 +1410,7 @@ function drawBackground(ctx){
 
 
 
+
 console.log(
-    "Canvas Version 6.0 geladen"
+    "Canvas Version 7.0 geladen"
 );
