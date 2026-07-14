@@ -2,7 +2,7 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 4.0
+ Version 5.0
  90 Grad Wechsellagen
 ==================================================
 */
@@ -15,58 +15,12 @@ function optimize(job){
 
 
 
-    getPatterns().forEach(pattern=>{
-
-
-        const result =
-            calculatePattern(
-                job,
-                pattern
-            );
+    const result =
+        calculatePattern(job);
 
 
 
-        if(result.totalCartons > 0){
-
-            variants.push(result);
-
-        }
-
-
-    });
-
-
-
-
-
-    variants.sort((a,b)=>{
-
-
-        if(
-            b.stability !== a.stability
-        ){
-
-            return (
-                b.stability -
-                a.stability
-            );
-
-        }
-
-
-
-        return (
-
-            b.totalCartons -
-
-            a.totalCartons
-
-        );
-
-
-    });
-
-
+    variants.push(result);
 
 
 
@@ -80,93 +34,27 @@ function optimize(job){
 
 
 
-
 // ======================================
-// Variante berechnen
+// Berechnung
 // ======================================
 
 
-function calculatePattern(
-
-    job,
-
-    pattern
-
-){
+function calculatePattern(job){
 
 
 
-    const normalLength =
+    const boxLength =
         job.box.length;
 
 
 
-    const normalWidth =
+    const boxWidth =
         job.box.width;
 
 
 
-
-
-
-    const colsNormal = Math.floor(
-
-        job.pallet.length /
-        normalLength
-
-    );
-
-
-
-    const rowsNormal = Math.floor(
-
-        job.pallet.width /
-        normalWidth
-
-    );
-
-
-
-
-
-    const cartonsNormal =
-
-        colsNormal *
-        rowsNormal;
-
-
-
-
-
-
-
-    const colsRotated = Math.floor(
-
-        job.pallet.length /
-        normalWidth
-
-    );
-
-
-
-    const rowsRotated = Math.floor(
-
-        job.pallet.width /
-        normalLength
-
-    );
-
-
-
-
-
-    const cartonsRotated =
-
-        colsRotated *
-        rowsRotated;
-
-
-
+    const boxHeight =
+        job.box.height;
 
 
 
@@ -180,12 +68,9 @@ function calculatePattern(
 
         )
         /
-        job.box.height
+        boxHeight
 
     );
-
-
-
 
 
 
@@ -195,19 +80,15 @@ function calculatePattern(
 
         layers,
 
-        colsNormal,
+        boxLength,
 
-        rowsNormal,
+        boxWidth,
 
-        colsRotated,
+        boxHeight,
 
-        rowsRotated,
+        job.pallet.length,
 
-        normalLength,
-
-        normalWidth,
-
-        job.box.height
+        job.pallet.width
 
     );
 
@@ -216,63 +97,44 @@ function calculatePattern(
 
 
 
+    // Anzahl Kartons pro Lage
 
-    const cartonsPerLayer = Math.max(
-
-        cartonsNormal,
-
-        cartonsRotated
-
-    );
-
-
-
-
-
-
-
-    const totalCartons =
-
-        boxes.length;
-
-
+    const layerCount =
+        boxes.filter(
+            b => b.layer === 1
+        ).length;
 
 
 
 
 
     const palletArea =
-
         job.pallet.length *
         job.pallet.width;
 
 
 
-
-
-
     const usedArea =
-
-        cartonsPerLayer *
-        normalLength *
-        normalWidth;
-
+        boxLength *
+        boxWidth *
+        layerCount;
 
 
 
 
 
-    const utilization = Number(
+    const utilization =
+        Number(
 
-        (
-            usedArea /
-            palletArea *
-            100
+            (
+                usedArea /
+                palletArea *
+                100
 
-        )
-        .toFixed(1)
+            )
+            .toFixed(1)
 
-    );
+        );
 
 
 
@@ -285,34 +147,56 @@ function calculatePattern(
 
 
         id:
-            pattern.id,
+        "cross90",
+
 
 
         name:
-            "90° Wechsellagen",
+        "90° Wechsellagen",
 
 
 
         stability:
-            95,
+        95,
 
 
 
+        layers:
         layers,
 
 
-        cartonsPerLayer,
+
+        cartonsPerLayer:
+        layerCount,
 
 
 
-        totalCartons,
+        totalCartons:
+        boxes.length,
 
 
 
+        utilization:
         utilization,
 
 
 
+        boxLength:
+        boxLength,
+
+
+
+        boxWidth:
+        boxWidth,
+
+
+
+        boxHeight:
+        boxHeight,
+
+
+
+        boxes:
         boxes
 
 
@@ -338,26 +222,21 @@ function createBoxes(
 
     layers,
 
-    colsNormal,
-
-    rowsNormal,
-
-    colsRotated,
-
-    rowsRotated,
-
     boxLength,
 
     boxWidth,
 
-    boxHeight
+    boxHeight,
+
+    palletLength,
+
+    palletWidth
 
 ){
 
 
 
-    const boxes=[];
-
+    const boxes = [];
 
 
 
@@ -366,15 +245,13 @@ function createBoxes(
 
     for(
 
-        let layer=0;
+        let layer = 0;
 
-        layer<layers;
+        layer < layers;
 
         layer++
 
     ){
-
-
 
 
 
@@ -384,10 +261,6 @@ function createBoxes(
 
 
 
-
-        let cols;
-
-        let rows;
 
         let length;
 
@@ -403,61 +276,64 @@ function createBoxes(
         if(rotated){
 
 
-            cols =
-                colsRotated;
-
-
-            rows =
-                rowsRotated;
-
-
-
             length =
-                boxWidth;
+            boxWidth;
 
 
 
             width =
-                boxLength;
+            boxLength;
 
 
 
             rotation =
-                90;
+            90;
 
 
 
         }
-
         else{
 
 
-            cols =
-                colsNormal;
-
-
-            rows =
-                rowsNormal;
-
-
-
             length =
-                boxLength;
+            boxLength;
 
 
 
             width =
-                boxWidth;
+            boxWidth;
 
 
 
             rotation =
-                0;
+            0;
 
 
 
         }
 
+
+
+
+
+
+
+
+        const cols = Math.floor(
+
+            palletLength /
+            length
+
+        );
+
+
+
+        const rows = Math.floor(
+
+            palletWidth /
+            width
+
+        );
 
 
 
@@ -468,9 +344,9 @@ function createBoxes(
 
         for(
 
-            let row=0;
+            let row = 0;
 
-            row<rows;
+            row < rows;
 
             row++
 
@@ -480,9 +356,9 @@ function createBoxes(
 
             for(
 
-                let col=0;
+                let col = 0;
 
-                col<cols;
+                col < cols;
 
                 col++
 
@@ -517,11 +393,13 @@ function createBoxes(
 
 
 
-                    length:length,
+                    length:
+                    length,
 
 
 
-                    width:width,
+                    width:
+                    width,
 
 
 
@@ -530,12 +408,13 @@ function createBoxes(
 
 
 
-                    rotation:rotation,
+                    rotation:
+                    rotation,
 
 
 
                     layer:
-                    layer+1
+                    layer + 1
 
 
 
@@ -544,10 +423,12 @@ function createBoxes(
 
 
 
+
             }
 
 
         }
+
 
 
 
