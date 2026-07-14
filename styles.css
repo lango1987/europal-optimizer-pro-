@@ -1,1 +1,220 @@
+/* ===========================
+   Europal Optimizer Pro
+   Version 1.0
+=========================== */
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f3f5f8;
+    color:#222;
+}
+
+/* Header */
+
+header{
+    height:70px;
+    background:#1565c0;
+    color:white;
+
+    display:flex;
+    align-items:center;
+    padding:0 30px;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.2);
+}
+
+header h1{
+    font-size:28px;
+}
+
+/* Layout */
+
+main{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:20px;
+
+    padding:20px;
+}
+
+/* Sidebar */
+
+#sidebar{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+#sidebar h2{
+
+    margin-bottom:20px;
+
+}
+
+#sidebar label{
+
+    display:block;
+
+    margin-top:15px;
+
+    font-weight:bold;
+
+}
+
+#sidebar input{
+
+    width:100%;
+
+    padding:12px;
+
+    margin-top:6px;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    font-size:15px;
+
+}
+
+#sidebar button{
+
+    width:100%;
+
+    margin-top:25px;
+
+    padding:15px;
+
+    background:#1565c0;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    font-size:17px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+#sidebar button:hover{
+
+    background:#0d47a1;
+
+}
+
+/* Rechte Seite */
+
+#workspace{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+}
+
+/* Dashboard */
+
+#dashboard{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:15px;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    text-align:center;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+.card h3{
+
+    color:#777;
+
+    font-size:15px;
+
+}
+
+.card p{
+
+    margin-top:12px;
+
+    font-size:32px;
+
+    font-weight:bold;
+
+}
+
+/* Canvas */
+
+#canvasArea{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+canvas{
+
+    width:100%;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+}
+
+/* Varianten */
+
+#variants{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+#variantList{
+
+    margin-top:15px;
+
+}
