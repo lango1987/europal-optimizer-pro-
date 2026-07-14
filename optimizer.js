@@ -2,8 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 5.0
- 90 Grad Wechsellagen
+ Version 6.0
+ Randfüllung + Wechsellagen
 ==================================================
 */
 
@@ -11,20 +11,20 @@
 function optimize(job){
 
 
-    const variants = [];
+
+    const variant =
+
+        calculateVariant(job);
 
 
 
-    const result =
-        calculatePattern(job);
 
+    return [
 
+        variant
 
-    variants.push(result);
+    ];
 
-
-
-    return variants;
 
 
 }
@@ -34,29 +34,13 @@ function optimize(job){
 
 
 
+
 // ======================================
-// Berechnung
+// Variante berechnen
 // ======================================
 
 
-function calculatePattern(job){
-
-
-
-    const boxLength =
-        job.box.length;
-
-
-
-    const boxWidth =
-        job.box.width;
-
-
-
-    const boxHeight =
-        job.box.height;
-
-
+function calculateVariant(job){
 
 
 
@@ -68,27 +52,7 @@ function calculatePattern(job){
 
         )
         /
-        boxHeight
-
-    );
-
-
-
-
-
-    const boxes = createBoxes(
-
-        layers,
-
-        boxLength,
-
-        boxWidth,
-
-        boxHeight,
-
-        job.pallet.length,
-
-        job.pallet.width
+        job.box.height
 
     );
 
@@ -97,46 +61,113 @@ function calculatePattern(job){
 
 
 
-    // Anzahl Kartons pro Lage
 
-    const layerCount =
+    const boxes=[];
+
+
+
+
+
+    for(
+
+        let layer=0;
+
+        layer<layers;
+
+        layer++
+
+    ){
+
+
+
+        const rotated =
+
+            layer % 2 === 1;
+
+
+
+
+
+        const layerBoxes =
+
+            packLayer(
+
+                job.pallet.length,
+
+                job.pallet.width,
+
+                job.box.length,
+
+                job.box.width,
+
+                rotated,
+
+                layer,
+
+                job.box.height
+
+            );
+
+
+
+
+
+        boxes.push(
+            ...layerBoxes
+        );
+
+
+
+    }
+
+
+
+
+
+
+    const firstLayer =
+
         boxes.filter(
-            b => b.layer === 1
-        ).length;
+
+            b=>b.layer===1
+
+        );
+
+
+
+
+
+
+
+    const usedArea =
+
+        firstLayer.reduce(
+
+            (sum,b)=>{
+
+                return sum +
+
+                (
+                    b.length *
+                    b.width
+                );
+
+            },
+
+            0
+
+        );
+
 
 
 
 
 
     const palletArea =
+
         job.pallet.length *
+
         job.pallet.width;
-
-
-
-    const usedArea =
-        boxLength *
-        boxWidth *
-        layerCount;
-
-
-
-
-
-    const utilization =
-        Number(
-
-            (
-                usedArea /
-                palletArea *
-                100
-
-            )
-            .toFixed(1)
-
-        );
-
-
 
 
 
@@ -147,57 +178,788 @@ function calculatePattern(job){
 
 
         id:
-        "cross90",
+
+        "edge_fill",
 
 
 
         name:
-        "90° Wechsellagen",
+
+        "Randfüllung 90° Wechsellage",
 
 
 
         stability:
-        95,
+
+        98,
 
 
 
         layers:
+
         layers,
 
 
 
         cartonsPerLayer:
-        layerCount,
+
+        firstLayer.length,
 
 
 
         totalCartons:
+
         boxes.length,
 
 
 
         utilization:
-        utilization,
 
+        Number(
 
+            (
+                usedArea /
+                palletArea *
+                100
 
-        boxLength:
-        boxLength,
+            )
+            .toFixed(1)
 
-
-
-        boxWidth:
-        boxWidth,
-
-
-
-        boxHeight:
-        boxHeight,
+        ),
 
 
 
         boxes:
+
         boxes
+
+
+    };
+
+
+}
+/*
+==================================================
+ Europal Optimizer Pro
+ Optimizer
+ Teil 2
+ Packalgorithmus
+==================================================
+*/
+
+
+
+// ======================================
+// Eine Lage packen
+// ======================================
+
+
+function packLayer(
+
+    palletLength,
+
+    palletWidth,
+
+    boxLength,
+
+    boxWidth,
+
+    rotated,
+
+    layer,
+
+    height
+
+){
+
+
+
+    const boxes = [];
+
+
+
+
+
+    let length;
+
+    let width;
+
+    let rotation;
+
+
+
+
+
+    if(rotated){
+
+
+
+        length = boxWidth;
+
+        width = boxLength;
+
+        rotation = 90;
+
+
+
+    }
+
+    else{
+
+
+
+        length = boxLength;
+
+        width = boxWidth;
+
+        rotation = 0;
+
+
+
+    }
+
+
+
+
+
+
+
+    const occupied=[];
+
+
+
+
+
+
+
+    // ==================================
+    // Ecke links oben
+    // ==================================
+
+
+    addBoxesFromArea(
+
+        boxes,
+
+        occupied,
+
+        0,
+
+        0,
+
+        palletLength,
+
+        palletWidth,
+
+        length,
+
+        width,
+
+        rotation,
+
+        layer,
+
+        height
+
+    );
+
+
+
+
+
+
+
+
+    // ==================================
+    // Restbereiche prüfen
+    // ==================================
+
+
+    fillRemainingAreas(
+
+        boxes,
+
+        occupied,
+
+        palletLength,
+
+        palletWidth,
+
+        length,
+
+        width,
+
+        rotation,
+
+        layer,
+
+        height
+
+    );
+
+
+
+
+
+
+    return boxes;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Kartons in Fläche setzen
+// ======================================
+
+
+function addBoxesFromArea(
+
+    boxes,
+
+    occupied,
+
+    startX,
+
+    startY,
+
+    areaWidth,
+
+    areaHeight,
+
+    boxLength,
+
+    boxWidth,
+
+    rotation,
+
+    layer,
+
+    height
+
+){
+
+
+
+    let y = startY;
+
+
+
+
+
+    while(
+
+        y + boxWidth <=
+
+        startY + areaHeight
+
+    ){
+
+
+
+        let x = startX;
+
+
+
+
+
+        while(
+
+            x + boxLength <=
+
+            startX + areaWidth
+
+        ){
+
+
+
+
+
+            if(
+
+                !collision(
+
+                    occupied,
+
+                    x,
+
+                    y,
+
+                    boxLength,
+
+                    boxWidth
+
+                )
+
+            ){
+
+
+
+                const box={
+
+
+
+                    x:x,
+
+                    y:y,
+
+                    z:
+
+                    layer *
+
+                    height,
+
+
+
+                    length:
+
+                    boxLength,
+
+
+
+                    width:
+
+                    boxWidth,
+
+
+
+                    height:
+
+                    height,
+
+
+
+                    rotation:
+
+                    rotation,
+
+
+
+                    layer:
+
+                    layer+1
+
+
+
+                };
+
+
+
+
+
+                boxes.push(box);
+
+
+
+                occupied.push(box);
+
+
+
+            }
+
+
+
+
+
+            x += boxLength;
+
+
+
+        }
+
+
+
+
+
+        y += boxWidth;
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+// ======================================
+// Überlappung prüfen
+// ======================================
+
+
+function collision(
+
+    boxes,
+
+    x,
+
+    y,
+
+    w,
+
+    h
+
+){
+
+
+
+    return boxes.some(box=>{
+
+
+        return !(
+
+            x+w <= box.x ||
+
+            x >= box.x+box.length ||
+
+            y+h <= box.y ||
+
+            y >= box.y+box.width
+
+        );
+
+
+
+    });
+
+
+
+}
+/*
+==================================================
+ Europal Optimizer Pro
+ Optimizer
+ Teil 3
+ Restflächen füllen
+==================================================
+*/
+
+
+
+// ======================================
+// Restflächen füllen
+// ======================================
+
+
+function fillRemainingAreas(
+
+    boxes,
+
+    occupied,
+
+    palletLength,
+
+    palletWidth,
+
+    boxLength,
+
+    boxWidth,
+
+    rotation,
+
+    layer,
+
+    height
+
+){
+
+
+
+    const step = 10;
+
+
+
+    for(
+
+        let y = 0;
+
+        y < palletWidth;
+
+        y += step
+
+    ){
+
+
+
+        for(
+
+            let x = 0;
+
+            x < palletLength;
+
+            x += step
+
+        ){
+
+
+
+
+
+            if(
+
+                x + boxLength >
+
+                palletLength
+
+            ){
+
+                continue;
+
+            }
+
+
+
+
+
+            if(
+
+                y + boxWidth >
+
+                palletWidth
+
+            ){
+
+                continue;
+
+            }
+
+
+
+
+
+
+
+            if(
+
+                !collision(
+
+                    occupied,
+
+                    x,
+
+                    y,
+
+                    boxLength,
+
+                    boxWidth
+
+                )
+
+            ){
+
+
+
+                const box={
+
+
+
+                    x:x,
+
+
+
+                    y:y,
+
+
+
+                    z:
+
+                    layer *
+
+                    height,
+
+
+
+                    length:
+
+                    boxLength,
+
+
+
+                    width:
+
+                    boxWidth,
+
+
+
+                    height:
+
+                    height,
+
+
+
+                    rotation:
+
+                    rotation,
+
+
+
+                    layer:
+
+                    layer+1
+
+
+
+                };
+
+
+
+
+
+                boxes.push(box);
+
+
+
+                occupied.push(box);
+
+
+
+            }
+
+
+
+
+        }
+
+
+
+    }
+
+
+
+}
+/*
+==================================================
+ Europal Optimizer Pro
+ Optimizer
+ Teil 4
+ Bewertung + Stabilität
+==================================================
+*/
+
+
+
+// ======================================
+// Schwerpunkt berechnen
+// ======================================
+
+
+function calculateCenterOfGravity(
+
+    boxes
+
+){
+
+
+
+    let totalWeight = 0;
+
+
+
+    let centerX = 0;
+
+    let centerY = 0;
+
+
+
+    boxes.forEach(box=>{
+
+
+
+        const area =
+
+            box.length *
+            box.width;
+
+
+
+        totalWeight += area;
+
+
+
+
+
+        centerX +=
+
+            (
+                box.x +
+                box.length / 2
+
+            )
+            *
+            area;
+
+
+
+
+
+        centerY +=
+
+            (
+                box.y +
+                box.width / 2
+
+            )
+            *
+            area;
+
+
+
+    });
+
+
+
+
+
+
+
+    if(totalWeight===0){
+
+
+        return {
+
+
+            x:0,
+
+            y:0
+
+
+        };
+
+
+    }
+
+
+
+
+
+    return {
+
+
+        x:
+
+        centerX /
+        totalWeight,
+
+
+
+        y:
+
+        centerY /
+        totalWeight
+
 
 
     };
@@ -214,124 +976,99 @@ function calculatePattern(job){
 
 
 // ======================================
-// Kartons erzeugen
+// Stabilität bewerten
 // ======================================
 
 
-function createBoxes(
+function calculateStability(
 
-    layers,
+    boxes,
 
-    boxLength,
-
-    boxWidth,
-
-    boxHeight,
-
-    palletLength,
-
-    palletWidth
+    pallet
 
 ){
 
 
 
-    const boxes = [];
+    const center =
 
+        calculateCenterOfGravity(
 
-
-
-
-
-    for(
-
-        let layer = 0;
-
-        layer < layers;
-
-        layer++
-
-    ){
-
-
-
-        let rotated =
-            layer % 2 === 1;
-
-
-
-
-
-        let length;
-
-        let width;
-
-        let rotation;
-
-
-
-
-
-
-        if(rotated){
-
-
-            length =
-            boxWidth;
-
-
-
-            width =
-            boxLength;
-
-
-
-            rotation =
-            90;
-
-
-
-        }
-        else{
-
-
-            length =
-            boxLength;
-
-
-
-            width =
-            boxWidth;
-
-
-
-            rotation =
-            0;
-
-
-
-        }
-
-
-
-
-
-
-
-
-        const cols = Math.floor(
-
-            palletLength /
-            length
+            boxes
 
         );
 
 
 
-        const rows = Math.floor(
 
-            palletWidth /
-            width
+
+    const palletCenterX =
+
+        pallet.length / 2;
+
+
+
+    const palletCenterY =
+
+        pallet.width / 2;
+
+
+
+
+
+
+    const distance =
+
+        Math.sqrt(
+
+            Math.pow(
+
+                center.x -
+                palletCenterX,
+
+                2
+
+            )
+
+            +
+
+            Math.pow(
+
+                center.y -
+                palletCenterY,
+
+                2
+
+            )
+
+        );
+
+
+
+
+
+
+    const maxDistance =
+
+        Math.sqrt(
+
+            Math.pow(
+
+                pallet.length/2,
+
+                2
+
+            )
+
+            +
+
+            Math.pow(
+
+                pallet.width/2,
+
+                2
+
+            )
 
         );
 
@@ -341,107 +1078,143 @@ function createBoxes(
 
 
 
+    let score =
 
-        for(
+        100 -
 
-            let row = 0;
+        (
+            distance /
+            maxDistance *
+            100
 
-            row < rows;
-
-            row++
-
-        ){
-
-
-
-            for(
-
-                let col = 0;
-
-                col < cols;
-
-                col++
-
-            ){
+        );
 
 
 
 
 
-                boxes.push({
+    if(score < 0){
 
-
-
-                    x:
-
-                    col *
-                    length,
-
-
-
-                    y:
-
-                    row *
-                    width,
-
-
-
-                    z:
-
-                    layer *
-                    boxHeight,
-
-
-
-                    length:
-                    length,
-
-
-
-                    width:
-                    width,
-
-
-
-                    height:
-                    boxHeight,
-
-
-
-                    rotation:
-                    rotation,
-
-
-
-                    layer:
-                    layer + 1
-
-
-
-                });
-
-
-
-
-
-            }
-
-
-        }
-
-
-
-
+        score = 0;
 
     }
 
 
 
+    return Number(
+
+        score.toFixed(1)
+
+    );
+
+
+
+}
 
 
 
 
-    return boxes;
+
+
+
+
+
+// ======================================
+// Gewicht prüfen
+// ======================================
+
+
+function calculateWeightLoad(
+
+    boxes,
+
+    weight
+
+){
+
+
+
+    return (
+
+        boxes.length *
+        weight
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Variante verbessern
+// ======================================
+
+
+function rateVariant(
+
+    variant,
+
+    job
+
+){
+
+
+
+    const stability =
+
+        calculateStability(
+
+            variant.boxes,
+
+            job.pallet
+
+        );
+
+
+
+
+
+
+    const weight =
+
+        calculateWeightLoad(
+
+            variant.boxes,
+
+            job.box.weight
+
+        );
+
+
+
+
+
+    variant.stability =
+
+        stability;
+
+
+
+
+
+    variant.totalWeight =
+
+        weight;
+
+
+
+
+
+    return variant;
+
 
 
 }
