@@ -2,7 +2,7 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 0.1.0
+ Version 2.0
 ==================================================
 */
 
@@ -12,9 +12,11 @@ function optimize(job) {
 
     getPatterns().forEach(pattern => {
 
-        variants.push(
-            calculatePattern(job, pattern)
-        );
+        const result = calculatePattern(job, pattern);
+
+        if (result.cartonsPerLayer > 0) {
+            variants.push(result);
+        }
 
     });
 
@@ -37,8 +39,7 @@ function calculatePattern(job, pattern) {
     let boxLength = job.box.length;
     let boxWidth = job.box.width;
 
-    // 90° drehen
-    if (pattern.id === "rotated") {
+    if (pattern.rotation === 90) {
 
         boxLength = job.box.width;
         boxWidth = job.box.length;
@@ -46,13 +47,17 @@ function calculatePattern(job, pattern) {
     }
 
     const cols = Math.floor(job.pallet.length / boxLength);
+
     const rows = Math.floor(job.pallet.width / boxWidth);
 
     const cartonsPerLayer = cols * rows;
 
-    const layers = Math.floor(
-        (job.settings.maxHeight - job.pallet.height) /
-        job.box.height
+    const layers = Math.max(
+        0,
+        Math.floor(
+            (job.settings.maxHeight - job.pallet.height) /
+            job.box.height
+        )
     );
 
     const totalCartons = cartonsPerLayer * layers;
@@ -61,10 +66,17 @@ function calculatePattern(job, pattern) {
         job.pallet.length * job.pallet.width;
 
     const usedArea =
-        cartonsPerLayer * boxLength * boxWidth;
+        cartonsPerLayer *
+        boxLength *
+        boxWidth;
 
-    const utilization =
-        Number(((usedArea / palletArea) * 100).toFixed(1));
+    const utilization = Number(
+        (
+            usedArea /
+            palletArea *
+            100
+        ).toFixed(1)
+    );
 
     return {
 
@@ -74,49 +86,64 @@ function calculatePattern(job, pattern) {
 
         stability: pattern.stability,
 
+        rotation: pattern.rotation,
+
         cols,
 
         rows,
 
-        boxLength,
-
-        boxWidth,
+        layers,
 
         cartonsPerLayer,
-
-        layers,
 
         totalCartons,
 
         utilization,
 
-  boxes: createBoxes(
+        boxLength,
 
-    cols,
+        boxWidth,
 
-    rows,
+        boxHeight: job.box.height,
 
-    layers,
+        boxes: createBoxes(
 
-    boxLength,
+            cols,
 
-    boxWidth,
+            rows,
 
-    job.box.height
+            layers,
 
-)     
+            boxLength,
+
+            boxWidth,
+
+            job.box.height,
+
+            pattern.rotation
+
+        )
 
     };
 
 }
 
 function createBoxes(
+
     cols,
+
     rows,
+
     layers,
+
     boxLength,
+
     boxWidth,
-    boxHeight
+
+    boxHeight,
+
+    rotation
+
 ) {
 
     const boxes = [];
@@ -126,6 +153,14 @@ function createBoxes(
         for (let row = 0; row < rows; row++) {
 
             for (let col = 0; col < cols; col++) {
+
+                let rot = rotation;
+
+                if (rotation === "alternate") {
+
+                    rot = layer % 2 === 0 ? 0 : 90;
+
+                }
 
                 boxes.push({
 
@@ -141,41 +176,13 @@ function createBoxes(
 
                     height: boxHeight,
 
-                    rotation: 0,
+                    rotation: rot,
 
                     layer: layer + 1
 
                 });
 
             }
-
-        }
-
-    }
-
-    return boxes;
-
-}
-
-    const boxes = [];
-
-    for (let row = 0; row < rows; row++) {
-
-        for (let col = 0; col < cols; col++) {
-
-            boxes.push({
-
-                x: col * boxLength,
-
-                y: row * boxWidth,
-
-                length: boxLength,
-
-                width: boxWidth,
-
-                rotation: 0
-
-            });
 
         }
 
