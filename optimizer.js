@@ -2,8 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 11.0
- Individuelle Lagen Optimierung
+ Version 12.0
+ Individuelle Ebenen
 ==================================================
 */
 
@@ -11,17 +11,11 @@
 function optimize(job){
 
 
-    const variant =
-        createOptimizedPallet(job);
-
-
-
     return [
 
-        variant
+        createOptimizedStack(job)
 
     ];
-
 
 }
 
@@ -32,28 +26,28 @@ function optimize(job){
 
 
 
-
 // ======================================
-// Palette erstellen
+// Stapel erzeugen
 // ======================================
 
 
-function createOptimizedPallet(job){
+function createOptimizedStack(job){
 
 
 
     const variant = {
 
 
+
         id:
 
-        "layer_optimizer",
+        "individual_layers",
 
 
 
         name:
 
-        "Individuelle Lagen Optimierung",
+        "Individuelle optimale Lagen",
 
 
 
@@ -86,7 +80,7 @@ function createOptimizedPallet(job){
 
 
 
-    const layers =
+    const layerCount =
 
         Math.floor(
 
@@ -110,7 +104,7 @@ function createOptimizedPallet(job){
 
 
 
-    variant.layers = layers;
+    variant.layers = layerCount;
 
 
 
@@ -123,7 +117,7 @@ function createOptimizedPallet(job){
 
         let layer = 0;
 
-        layer < layers;
+        layer < layerCount;
 
         layer++
 
@@ -131,17 +125,16 @@ function createOptimizedPallet(job){
 
 
 
-
-
         const layerBoxes =
 
-            optimizeSingleLayer(
+            optimizeLayer(
 
                 job,
 
                 layer
 
             );
+
 
 
 
@@ -173,6 +166,7 @@ function createOptimizedPallet(job){
 
 
 
+
     calculateUtilization(
 
         variant,
@@ -180,6 +174,7 @@ function createOptimizedPallet(job){
         job
 
     );
+
 
 
 
@@ -203,11 +198,11 @@ function createOptimizedPallet(job){
 
 
 // ======================================
-// Eine Lage optimal packen
+// Eine Lage berechnen
 // ======================================
 
 
-function optimizeSingleLayer(
+function optimizeLayer(
 
     job,
 
@@ -217,107 +212,13 @@ function optimizeSingleLayer(
 
 
 
-    const normal =
+    const patterns = [
 
-        packLayer(
+        createPattern(layer,0),
 
-            job,
+        createPattern(layer,1),
 
-            layer,
-
-            [
-
-                {
-
-                    length:
-
-                    job.box.length,
-
-
-                    width:
-
-                    job.box.width,
-
-
-                    rotation:0
-
-
-                }
-
-            ]
-
-        );
-
-
-
-
-
-
-
-
-    const rotated =
-
-        packLayer(
-
-            job,
-
-            layer,
-
-            [
-
-                {
-
-                    length:
-
-                    job.box.width,
-
-
-                    width:
-
-                    job.box.length,
-
-
-                    rotation:90
-
-
-                }
-
-            ]
-
-        );
-
-
-
-
-
-
-
-
-    const mixed =
-
-        packMixedLayer(
-
-            job,
-
-            layer
-
-        );
-
-
-
-
-
-
-
-
-
-    const options = [
-
-        normal,
-
-        rotated,
-
-        mixed
+        createPattern(layer,2)
 
     ];
 
@@ -327,17 +228,51 @@ function optimizeSingleLayer(
 
 
 
+    let best = [];
 
-    options.sort((a,b)=>{
 
 
-        return (
 
-            b.length -
 
-            a.length
 
-        );
+
+
+    patterns.forEach(pattern=>{
+
+
+
+        const result =
+
+            packPattern(
+
+                job,
+
+                layer,
+
+                pattern
+
+            );
+
+
+
+
+
+
+        if(
+
+            result.length >
+
+            best.length
+
+        ){
+
+
+
+            best = result;
+
+
+
+        }
 
 
 
@@ -350,7 +285,7 @@ function optimizeSingleLayer(
 
 
 
-    return options[0];
+    return best;
 
 
 
@@ -363,229 +298,49 @@ function optimizeSingleLayer(
 
 
 
+
 // ======================================
-// Eine Richtung packen
+// Suchmuster erzeugen
 // ======================================
 
 
-function packLayer(
-
-    job,
+function createPattern(
 
     layer,
 
-    patterns
+    type
 
 ){
 
 
 
-    const boxes=[];
+    if(type===0){
 
 
 
-    const freeAreas=[];
+        return {
 
 
 
+            name:
 
+            "normal",
 
 
 
-    freeAreas.push({
+            startX:0,
 
 
 
-        x:0,
+            startY:0,
 
 
-        y:0,
 
+            reverse:false
 
-        width:
 
-        job.pallet.length,
 
-
-        height:
-
-        job.pallet.width
-
-
-
-    });
-
-
-
-
-
-
-
-
-    while(
-
-        freeAreas.length > 0
-
-    ){
-
-
-
-        sortFreeAreas(
-
-            freeAreas
-
-        );
-
-
-
-
-
-        const area =
-
-            freeAreas.shift();
-
-
-
-
-
-
-
-        let placed = false;
-
-
-
-
-
-
-
-
-        for(
-
-            let p of patterns
-
-        ){
-
-
-
-            if(
-
-                p.length <= area.width
-
-                &&
-
-                p.width <= area.height
-
-            ){
-
-
-
-                boxes.push({
-
-
-
-                    x:
-
-                    area.x,
-
-
-
-                    y:
-
-                    area.y,
-
-
-
-                    z:
-
-                    layer *
-
-                    job.box.height,
-
-
-
-                    length:
-
-                    p.length,
-
-
-
-                    width:
-
-                    p.width,
-
-
-
-                    height:
-
-                    job.box.height,
-
-
-
-                    rotation:
-
-                    p.rotation,
-
-
-
-                    layer:
-
-                    layer + 1
-
-
-
-                });
-
-
-
-
-
-
-
-                splitArea(
-
-                    freeAreas,
-
-                    area,
-
-                    p.length,
-
-                    p.width
-
-                );
-
-
-
-
-
-                placed = true;
-
-
-
-                break;
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-
-        if(!placed){
-
-
-
-            continue;
-
-
-
-        }
+        };
 
 
 
@@ -597,7 +352,71 @@ function packLayer(
 
 
 
-    return boxes;
+
+    if(type===1){
+
+
+
+        return {
+
+
+
+            name:
+
+            "gedreht_start",
+
+
+
+            startX:1,
+
+
+
+            startY:0,
+
+
+
+            reverse:true
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        name:
+
+        "wechsel_start",
+
+
+
+        startX:0,
+
+
+
+        startY:1,
+
+
+
+        reverse:
+
+        layer%2===0
+
+
+
+    };
 
 
 
@@ -607,49 +426,87 @@ function packLayer(
  Europal Optimizer Pro
  Optimizer
  Teil 3
- Mischpackung innerhalb einer Lage
+ Packmuster ausführen
 ==================================================
 */
 
 
 
 // ======================================
-// Gemischte Lage optimieren
+// Muster packen
 // ======================================
 
 
-function packMixedLayer(
+function packPattern(
 
     job,
 
-    layer
+    layer,
+
+    pattern
 
 ){
 
 
 
-    const boxes=[];
+    const boxes = [];
 
 
 
-    const freeAreas=[];
+    const freeAreas = [];
 
 
 
+
+
+
+
+
+    // Startbereich abhängig vom Muster
 
 
     freeAreas.push({
 
 
-        x:0,
+
+        x:
+
+        pattern.startX === 1
+
+        ?
+
+        job.pallet.length
+
+        :
+
+        0,
 
 
-        y:0,
+
+
+
+        y:
+
+        pattern.startY === 1
+
+        ?
+
+        job.pallet.width
+
+        :
+
+        0,
+
+
+
 
 
         width:
 
         job.pallet.length,
+
+
+
 
 
         height:
@@ -659,6 +516,7 @@ function packMixedLayer(
 
 
     });
+
 
 
 
@@ -698,15 +556,18 @@ function packMixedLayer(
 
         const placement =
 
-            findBestBoxForArea(
+            findBestBox(
 
                 area,
 
                 job.box.length,
 
-                job.box.width
+                job.box.width,
+
+                pattern
 
             );
+
 
 
 
@@ -730,7 +591,7 @@ function packMixedLayer(
 
 
 
-        const box={
+        const box = {
 
 
 
@@ -780,7 +641,7 @@ function packMixedLayer(
 
             layer:
 
-            layer+1
+            layer + 1
 
 
 
@@ -837,23 +698,27 @@ function packMixedLayer(
 
 
 // ======================================
-// Besten Karton für freie Fläche suchen
+// Besten Karton wählen
 // ======================================
 
 
-function findBestBoxForArea(
+function findBestBox(
 
     area,
 
     boxLength,
 
-    boxWidth
+    boxWidth,
+
+    pattern
 
 ){
 
 
 
-    const possible=[];
+    const options = [];
+
+
 
 
 
@@ -866,17 +731,20 @@ function findBestBoxForArea(
 
     if(
 
+
         boxLength <= area.width
 
         &&
 
         boxWidth <= area.height
 
+
+
     ){
 
 
 
-        possible.push({
+        options.push({
 
 
 
@@ -912,10 +780,12 @@ function findBestBoxForArea(
 
 
 
-    // gedrehte Richtung
+    // 90 Grad gedreht
 
 
     if(
+
+
 
         boxWidth <= area.width
 
@@ -923,11 +793,13 @@ function findBestBoxForArea(
 
         boxLength <= area.height
 
+
+
     ){
 
 
 
-        possible.push({
+        options.push({
 
 
 
@@ -961,11 +833,9 @@ function findBestBoxForArea(
 
 
 
-
-
     if(
 
-        possible.length === 0
+        options.length === 0
 
     ){
 
@@ -983,13 +853,10 @@ function findBestBoxForArea(
 
 
 
+    // beste Restfläche auswählen
 
 
-    // Richtung wählen,
-    // die Restfläche kleiner macht
-
-
-    possible.sort((a,b)=>{
+    options.sort((a,b)=>{
 
 
 
@@ -1053,8 +920,7 @@ function findBestBoxForArea(
 
 
 
-
-    return possible[0];
+    return options[0];
 
 
 
@@ -1071,7 +937,7 @@ function findBestBoxForArea(
 
 
 // ======================================
-// Fläche teilen
+// Freifläche teilen
 // ======================================
 
 
@@ -1089,7 +955,7 @@ function splitArea(
 
 
 
-    // rechte Restfläche
+    // rechte Fläche
 
 
     const right = {
@@ -1131,7 +997,8 @@ function splitArea(
 
 
 
-    // untere Restfläche
+
+    // untere Fläche
 
 
     const bottom = {
@@ -1233,7 +1100,7 @@ function splitArea(
 
 
 
-    cleanFreeAreas(
+    cleanAreas(
 
         freeAreas
 
@@ -1252,8 +1119,7 @@ function splitArea(
 
 
 // ======================================
-// Freiflächen sortieren
-// größte zuerst
+// Größte Fläche zuerst
 // ======================================
 
 
@@ -1269,25 +1135,23 @@ function sortFreeAreas(
 
 
 
-        const areaA =
+        return (
 
-        a.width *
+            b.width *
 
-        a.height;
+            b.height
 
+        )
 
+        -
 
-        const areaB =
+        (
 
-        b.width *
+            a.width *
 
-        b.height;
+            a.height
 
-
-
-
-
-        return areaB-areaA;
+        );
 
 
 
@@ -1306,11 +1170,11 @@ function sortFreeAreas(
 
 
 // ======================================
-// Kleine Flächen entfernen
+// Kleine Restflächen löschen
 // ======================================
 
 
-function cleanFreeAreas(
+function cleanAreas(
 
     freeAreas
 
@@ -1330,13 +1194,22 @@ function cleanFreeAreas(
 
 
 
+        const area =
+
+            freeAreas[i];
+
+
+
+
+
+
         if(
 
-            freeAreas[i].width < 5
+            area.width < 5
 
             ||
 
-            freeAreas[i].height < 5
+            area.height < 5
 
         ){
 
@@ -1375,7 +1248,7 @@ function cleanFreeAreas(
 // ======================================
 
 
-function mergeFreeAreas(
+function mergeAreas(
 
     freeAreas
 
@@ -1399,52 +1272,54 @@ function mergeFreeAreas(
 
             let j=i+1;
 
-            j<freeAreas.length;
+        j<freeAreas.length;
 
-            j++
+        j++
 
         ){
 
 
 
-
-
             const a =
 
-                freeAreas[i];
+            freeAreas[i];
 
 
 
             const b =
 
-                freeAreas[j];
+            freeAreas[j];
 
 
 
 
 
 
+
+            // nebeneinander
 
 
             if(
 
-                a.x === b.x
+
+                a.y === b.y
 
                 &&
 
-                a.width === b.width
+                a.height === b.height
 
                 &&
 
-                a.y + a.height === b.y
+                a.x + a.width === b.x
+
 
             ){
 
 
 
-                a.height +=
+                a.width +=
 
-                b.height;
+                b.width;
 
 
 
@@ -1501,7 +1376,9 @@ function calculateUtilization(
 
 
 
-    let usedArea = 0;
+    let used = 0;
+
+
 
 
 
@@ -1509,7 +1386,7 @@ function calculateUtilization(
 
 
 
-        usedArea +=
+        used +=
 
         box.length *
 
@@ -1539,13 +1416,14 @@ function calculateUtilization(
 
 
 
+
     variant.utilization =
 
         Number(
 
             (
 
-                usedArea /
+                used /
 
                 palletArea *
 
@@ -1570,11 +1448,11 @@ function calculateUtilization(
 
 
 // ======================================
-// Schwerpunkt
+// Schwerpunkt berechnen
 // ======================================
 
 
-function calculateCenter(
+function calculateCenterOfGravity(
 
     boxes
 
@@ -1595,11 +1473,12 @@ function calculateCenter(
 
 
 
+
     boxes.forEach(box=>{
 
 
 
-        const area =
+        const weight =
 
             box.length *
 
@@ -1609,7 +1488,9 @@ function calculateCenter(
 
 
 
-        total += area;
+
+        total += weight;
+
 
 
 
@@ -1622,13 +1503,14 @@ function calculateCenter(
 
             box.x +
 
-            box.length/2
+            box.length / 2
 
         )
 
         *
 
-        area;
+        weight;
+
 
 
 
@@ -1641,13 +1523,13 @@ function calculateCenter(
 
             box.y +
 
-            box.width/2
+            box.width / 2
 
         )
 
         *
 
-        area;
+        weight;
 
 
 
@@ -1660,7 +1542,7 @@ function calculateCenter(
 
 
 
-    if(total===0){
+    if(total === 0){
 
 
 
@@ -1668,6 +1550,566 @@ function calculateCenter(
 
 
             x:0,
+
+
+            y:0
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        x:
+
+        x / total,
+
+
+
+        y:
+
+        y / total
+
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Stabilität berechnen
+// ======================================
+
+
+function calculateStability(
+
+    boxes,
+
+    pallet
+
+){
+
+
+
+    const center =
+
+        calculateCenterOfGravity(
+
+            boxes
+
+        );
+
+
+
+
+
+
+    const palletCenter = {
+
+
+
+        x:
+
+        pallet.length / 2,
+
+
+
+        y:
+
+        pallet.width / 2
+
+
+
+    };
+
+
+
+
+
+
+
+
+    const distance = Math.sqrt(
+
+
+
+        Math.pow(
+
+            center.x -
+
+            palletCenter.x,
+
+            2
+
+        )
+
+
+
+        +
+
+
+
+        Math.pow(
+
+            center.y -
+
+            palletCenter.y,
+
+            2
+
+        )
+
+
+
+    );
+
+
+
+
+
+
+
+
+    const maxDistance = Math.sqrt(
+
+
+
+        Math.pow(
+
+            pallet.length / 2,
+
+            2
+
+        )
+
+
+
+        +
+
+
+
+        Math.pow(
+
+            pallet.width / 2,
+
+            2
+
+        )
+
+
+
+    );
+
+
+
+
+
+
+
+
+    return Number(
+
+
+
+        Math.max(
+
+            0,
+
+            100 -
+
+            (
+
+                distance /
+
+                maxDistance *
+
+                100
+
+            )
+
+        )
+
+
+
+        .toFixed(1)
+
+
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Randnutzung
+// ======================================
+
+
+function calculateEdgeUsage(
+
+    boxes,
+
+    pallet
+
+){
+
+
+
+    let points = 0;
+
+
+
+
+
+
+
+    boxes.forEach(box=>{
+
+
+
+        if(box.x === 0){
+
+            points++;
+
+        }
+
+
+
+
+
+        if(box.y === 0){
+
+            points++;
+
+        }
+
+
+
+
+
+        if(
+
+            box.x +
+
+            box.length
+
+            ===
+
+            pallet.length
+
+        ){
+
+            points++;
+
+        }
+
+
+
+
+
+        if(
+
+            box.y +
+
+            box.width
+
+            ===
+
+            pallet.width
+
+        ){
+
+            points++;
+
+        }
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+    return Math.min(
+
+        100,
+
+        points * 2
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Gesamtbewertung
+// ======================================
+
+
+function evaluateVariant(
+
+    variant,
+
+    job
+
+){
+
+
+
+    calculateUtilization(
+
+        variant,
+
+        job
+
+    );
+
+
+
+
+
+
+
+
+    variant.stability =
+
+        calculateStability(
+
+            variant.boxes,
+
+            job.pallet
+
+        );
+
+
+
+
+
+
+
+
+    const edge =
+
+        calculateEdgeUsage(
+
+            variant.boxes,
+
+            job.pallet
+
+        );
+
+
+
+
+
+
+
+    variant.score =
+
+
+
+        (
+
+            variant.utilization *
+
+            0.60
+
+        )
+
+
+
+        +
+
+
+
+        (
+
+            variant.stability *
+
+            0.30
+
+        )
+
+
+
+        +
+
+
+
+        (
+
+            edge *
+
+            0.10
+
+        );
+
+
+
+}
+/*
+==================================================
+ Europal Optimizer Pro
+ Optimizer
+ Teil 6
+ Stabilität der Lagen
+==================================================
+*/
+
+
+
+// ======================================
+// Lage auslesen
+// ======================================
+
+
+function getLayerBoxes(
+
+    boxes,
+
+    layer
+
+){
+
+
+
+    return boxes.filter(
+
+        box =>
+
+        box.layer === layer
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Mittelpunkt einer Lage
+// ======================================
+
+
+function getLayerCenter(
+
+    boxes
+
+){
+
+
+
+    let x = 0;
+
+    let y = 0;
+
+    let count = 0;
+
+
+
+
+
+
+
+    boxes.forEach(box=>{
+
+
+
+        x +=
+
+        box.x +
+
+        box.length / 2;
+
+
+
+
+
+        y +=
+
+        box.y +
+
+        box.width / 2;
+
+
+
+
+
+        count++;
+
+
+
+    });
+
+
+
+
+
+
+
+
+    if(count===0){
+
+
+
+        return {
+
+
+            x:0,
+
 
             y:0
 
@@ -1690,13 +2132,13 @@ function calculateCenter(
 
         x:
 
-        x/total,
+        x / count,
 
 
 
         y:
 
-        y/total
+        y / count
 
 
 
@@ -1715,25 +2157,109 @@ function calculateCenter(
 
 
 // ======================================
-// Stabilität
+// Versatz zwischen Lagen prüfen
 // ======================================
 
 
-function calculateStability(
+function calculateLayerOffset(
 
     boxes,
 
-    pallet
+    layers
 
 ){
 
 
 
-    const center =
+    let score = 100;
 
-        calculateCenter(
 
-            boxes
+
+
+
+
+
+    for(
+
+        let i=1;
+
+        i<layers;
+
+        i++
+
+    ){
+
+
+
+        const previous =
+
+            getLayerCenter(
+
+                getLayerBoxes(
+
+                    boxes,
+
+                    i
+
+                )
+
+            );
+
+
+
+
+
+        const current =
+
+            getLayerCenter(
+
+                getLayerBoxes(
+
+                    boxes,
+
+                    i+1
+
+                )
+
+            );
+
+
+
+
+
+
+
+        const distance = Math.sqrt(
+
+
+
+            Math.pow(
+
+                previous.x -
+
+                current.x,
+
+                2
+
+            )
+
+
+
+            +
+
+
+
+            Math.pow(
+
+                previous.y -
+
+                current.y,
+
+                2
+
+            )
+
+
 
         );
 
@@ -1742,117 +2268,33 @@ function calculateStability(
 
 
 
-    const cx =
 
-        pallet.length/2;
+        if(distance < 20){
 
 
 
-    const cy =
+            score -= 5;
 
-        pallet.width/2;
 
 
+        }
 
 
 
+    }
 
 
 
-    const distance = Math.sqrt(
 
 
 
-        Math.pow(
 
-            center.x-cx,
 
-            2
+    return Math.max(
 
-        )
+        0,
 
-
-
-        +
-
-
-
-        Math.pow(
-
-            center.y-cy,
-
-            2
-
-        )
-
-
-
-    );
-
-
-
-
-
-
-
-
-    const max = Math.sqrt(
-
-
-
-        Math.pow(
-
-            pallet.length/2,
-
-            2
-
-        )
-
-
-
-        +
-
-
-
-        Math.pow(
-
-            pallet.width/2,
-
-            2
-
-        )
-
-
-
-    );
-
-
-
-
-
-
-
-    return Number(
-
-
-
-        Math.max(
-
-            0,
-
-            100 -
-
-            (
-
-                distance/max*100
-
-            )
-
-        )
-
-        .toFixed(1)
-
-
+        score
 
     );
 
@@ -1869,112 +2311,11 @@ function calculateStability(
 
 
 // ======================================
-// Randabdeckung
+// Endgültige Stabilitätswertung
 // ======================================
 
 
-function calculateEdgeScore(
-
-    boxes,
-
-    pallet
-
-){
-
-
-
-    let score = 0;
-
-
-
-
-
-    boxes.forEach(box=>{
-
-
-
-        if(box.x===0){
-
-            score += 1;
-
-        }
-
-
-
-        if(box.y===0){
-
-            score += 1;
-
-        }
-
-
-
-        if(
-
-            box.x + box.length
-
-            ===
-
-            pallet.length
-
-        ){
-
-            score += 1;
-
-        }
-
-
-
-        if(
-
-            box.y + box.width
-
-            ===
-
-            pallet.width
-
-        ){
-
-            score += 1;
-
-        }
-
-
-
-    });
-
-
-
-
-
-
-
-    return Math.min(
-
-        100,
-
-        score * 2
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Gesamtbewertung
-// ======================================
-
-
-function evaluateLayerVariant(
+function calculateFinalStability(
 
     variant,
 
@@ -1984,19 +2325,7 @@ function evaluateLayerVariant(
 
 
 
-    calculateUtilization(
-
-        variant,
-
-        job
-
-    );
-
-
-
-
-
-    variant.stability =
+    const centerScore =
 
         calculateStability(
 
@@ -2012,13 +2341,14 @@ function evaluateLayerVariant(
 
 
 
-    const edge =
 
-        calculateEdgeScore(
+    const offsetScore =
+
+        calculateLayerOffset(
 
             variant.boxes,
 
-            job.pallet
+            variant.layers
 
         );
 
@@ -2028,43 +2358,103 @@ function evaluateLayerVariant(
 
 
 
-    variant.score =
+
+    variant.stability =
 
 
 
-        (
+        Number(
 
-            variant.utilization *
+            (
 
-            0.6
+                centerScore *
 
-        )
+                0.7
 
-        +
+                +
 
+                offsetScore *
 
+                0.3
 
-        (
+            )
 
-            variant.stability *
-
-            0.3
-
-        )
-
-        +
-
-
-
-        (
-
-            edge *
-
-            0.1
+            .toFixed(1)
 
         );
 
 
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Stapelhöhe prüfen
+// ======================================
+
+
+function checkHeight(
+
+    boxes,
+
+    maxHeight
+
+){
+
+
+
+    let highest = 0;
+
+
+
+
+
+
+
+    boxes.forEach(box=>{
+
+
+
+        const top =
+
+        box.z +
+
+        box.height;
+
+
+
+
+
+
+
+        if(top > highest){
+
+
+
+            highest = top;
+
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+
+
+    return highest <= maxHeight;
 
 
 
@@ -2073,19 +2463,19 @@ function evaluateLayerVariant(
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Teil 6
- Abschluss + Ausgabe
+ Teil 7
+ Abschluss
 ==================================================
 */
 
 
 
 // ======================================
-// Variante fertigstellen
+// Finale Variante vorbereiten
 // ======================================
 
 
-function finalizeVariant(
+function finalizeOptimizer(
 
     variant,
 
@@ -2095,15 +2485,59 @@ function finalizeVariant(
 
 
 
+    // ungültige Kartons entfernen
+
+
     variant.boxes =
 
-        validateBoxes(
+        variant.boxes.filter(box=>{
 
-            variant.boxes,
 
-            job.pallet
 
-        );
+            return (
+
+                box.x >= 0
+
+                &&
+
+                box.y >= 0
+
+
+
+                &&
+
+
+
+                box.x +
+
+                box.length
+
+                <=
+
+                job.pallet.length
+
+
+
+                &&
+
+
+
+                box.y +
+
+                box.width
+
+                <=
+
+                job.pallet.width
+
+
+
+            );
+
+
+
+        });
+
 
 
 
@@ -2120,30 +2554,30 @@ function finalizeVariant(
 
 
 
-    variant.layers =
-
-        Math.max(
-
-            ...variant.boxes.map(
-
-                b=>b.layer
-
-            )
-
-        );
-
-
-
-
-
-
-    evaluateLayerVariant(
+    calculateUtilization(
 
         variant,
 
         job
 
     );
+
+
+
+
+
+
+
+
+    calculateFinalStability(
+
+        variant,
+
+        job
+
+    );
+
+
 
 
 
@@ -2165,88 +2599,11 @@ function finalizeVariant(
 
 
 // ======================================
-// Sicherheitsprüfung
-// ======================================
-
-
-function validateBoxes(
-
-    boxes,
-
-    pallet
-
-){
-
-
-
-    return boxes.filter(box=>{
-
-
-
-        return (
-
-
-
-            box.x >= 0
-
-
-
-            &&
-
-
-
-            box.y >= 0
-
-
-
-            &&
-
-
-
-            box.x + box.length
-
-            <=
-
-            pallet.length
-
-
-
-            &&
-
-
-
-            box.y + box.width
-
-            <=
-
-            pallet.width
-
-
-
-        );
-
-
-
-    });
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
 // Ebenen Statistik
 // ======================================
 
 
-function getLayerStatistics(
+function layerStatistics(
 
     boxes
 
@@ -2272,6 +2629,7 @@ function getLayerStatistics(
 
 
         }
+
 
 
 
@@ -2326,7 +2684,7 @@ function debugOptimizer(
 
     console.log(
 
-        "Optimierung:",
+        "Name:",
 
         variant.name
 
@@ -2388,9 +2746,9 @@ function debugOptimizer(
 
     console.log(
 
-        "Lagen Übersicht:",
+        "Kartons pro Lage:",
 
-        getLayerStatistics(
+        layerStatistics(
 
             variant.boxes
 
@@ -2415,8 +2773,10 @@ function debugOptimizer(
 
 
 
+
+
 console.log(
 
-    "Optimizer Version 11.0 geladen"
+    "Optimizer Version 12.0 geladen"
 
 );
