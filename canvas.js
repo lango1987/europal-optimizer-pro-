@@ -2,77 +2,153 @@
 ==================================================
  Europal Optimizer Pro
  canvas.js
- Version 30.0
- Neue 2D + 3D Darstellung
+ kompatibel mit app.js
+ Version 40.0
 ==================================================
 */
 
 
 let canvas;
-
 let ctx;
 
 
-let currentView = "top";
 
+let canvasMode = "top";
 
-let currentLayer = 0;
-
-
-let currentResult = null;
-
-
-
+let selectedLayer = 0;
 
 
 
 // ======================================
-// Canvas starten
+// Hauptfunktion aus app.js
 // ======================================
 
 
-function initCanvas(){
+function drawVariant(
+
+    canvasId,
+
+    variant,
+
+    pallet
+
+){
+
 
 
     canvas = document.getElementById(
-        "canvas"
+
+        canvasId
+
     );
+
+
+
+    if(!canvas){
+
+        return;
+
+    }
+
 
 
     ctx = canvas.getContext(
+
         "2d"
+
     );
 
 
-    drawCanvas();
+
+    canvas.width = canvas.clientWidth;
+
+    canvas.height = canvas.clientHeight;
+
+
+
+    variant.pallet = pallet;
+
+
+
+    window.currentVariant = variant;
+
+
+
+    clearCanvas();
+
+
+
+
+
+
+
+    if(canvasMode === "top"){
+
+
+
+        drawTopView(
+
+            variant,
+
+            pallet
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+    else if(canvasMode === "3d"){
+
+
+
+        draw3DView(
+
+            variant,
+
+            pallet
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+    else if(canvasMode === "layer"){
+
+
+
+        drawLayerView(
+
+            variant,
+
+            pallet,
+
+            selectedLayer
+
+        );
+
+
+
+    }
+
 
 
 }
 
 
-
-
-
-
-
-// ======================================
-// Optimierer Ergebnis setzen
-// ======================================
-
-
-function setCanvasResult(result){
-
-
-    currentResult = result;
-
-
-    currentLayer = 0;
-
-
-    drawCanvas();
-
-
-}
 
 
 
@@ -85,16 +161,40 @@ function setCanvasResult(result){
 // ======================================
 
 
-function changeView(view){
+function setCanvasMode(
+
+    mode
+
+){
 
 
-    currentView = view;
+
+    canvasMode = mode;
 
 
-    drawCanvas();
+
+    if(window.currentVariant){
+
+
+
+        drawVariant(
+
+            "canvas",
+
+            window.currentVariant,
+
+            window.currentVariant.pallet
+
+        );
+
+
+
+    }
+
 
 
 }
+
 
 
 
@@ -107,16 +207,40 @@ function changeView(view){
 // ======================================
 
 
-function changeLayer(layer){
+function setCanvasLayer(
+
+    layer
+
+){
 
 
-    currentLayer = layer;
+
+    selectedLayer = layer;
 
 
-    currentView = "layer";
+
+    canvasMode = "layer";
 
 
-    drawCanvas();
+
+    if(window.currentVariant){
+
+
+
+        drawVariant(
+
+            "canvas",
+
+            window.currentVariant,
+
+            window.currentVariant.pallet
+
+        );
+
+
+
+    }
+
 
 
 }
@@ -127,20 +251,8 @@ function changeLayer(layer){
 
 
 
-// ======================================
-// Hauptzeichnung
-// ======================================
 
-
-function drawCanvas(){
-
-
-
-    if(!ctx || !currentResult){
-
-        return;
-
-    }
+function clearCanvas(){
 
 
 
@@ -158,42 +270,9 @@ function drawCanvas(){
 
 
 
-
-
-
-    if(currentView==="top"){
-
-
-        drawTopView();
-
-
-    }
-
-
-
-    if(currentView==="layer"){
-
-
-        drawLayerView();
-
-
-    }
-
-
-
-    if(currentView==="3d"){
-
-
-        draw3DView();
-
-
-    }
-
-
 }
 /*
 ==================================================
- Europal Optimizer Pro
  canvas.js
  Teil 2
  2D Darstellung
@@ -207,25 +286,29 @@ function drawCanvas(){
 // ======================================
 
 
-function drawTopView(){
+function drawTopView(
+
+    variant,
+
+    pallet
+
+){
 
 
 
-    const boxes =
+    drawPallet2D(
 
-        currentResult.boxes;
+        pallet
 
-
-
-
-
-    drawPallet2D();
+    );
 
 
 
 
 
-    boxes.forEach(box=>{
+
+
+    variant.boxes.forEach(box=>{
 
 
 
@@ -233,7 +316,7 @@ function drawTopView(){
 
             box,
 
-            false
+            pallet
 
         );
 
@@ -258,11 +341,23 @@ function drawTopView(){
 // ======================================
 
 
-function drawLayerView(){
+function drawLayerView(
+
+    variant,
+
+    pallet,
+
+    layer
+
+){
 
 
 
-    drawPallet2D();
+    drawPallet2D(
+
+        pallet
+
+    );
 
 
 
@@ -270,7 +365,7 @@ function drawLayerView(){
 
 
 
-    currentResult.boxes
+    variant.boxes
 
     .filter(box=>{
 
@@ -278,9 +373,7 @@ function drawLayerView(){
 
         return (
 
-            box.layer ===
-
-            currentLayer
+            box.layer === layer
 
         );
 
@@ -296,7 +389,7 @@ function drawLayerView(){
 
             box,
 
-            true
+            pallet
 
         );
 
@@ -321,47 +414,21 @@ function drawLayerView(){
 // ======================================
 
 
-function drawPallet2D(){
+function drawPallet2D(
 
+    pallet
 
-
-    const pallet =
-
-        currentResult.pallet ||
-
-        {
-
-            length:1200,
-
-            width:800
-
-        };
-
-
-
-
+){
 
 
 
     const scale =
 
-        Math.min(
+        get2DScale(
 
-            canvas.width /
+            pallet
 
-            pallet.length,
-
-
-
-            canvas.height /
-
-            pallet.width
-
-        )
-
-        *
-
-        0.75;
+        );
 
 
 
@@ -369,48 +436,15 @@ function drawPallet2D(){
 
 
 
-    const offsetX =
+    const offset =
 
-        (
+        get2DOffset(
 
-            canvas.width -
-
-            pallet.length *
+            pallet,
 
             scale
 
-        )
-
-        /2;
-
-
-
-
-
-
-
-    const offsetY =
-
-        (
-
-            canvas.height -
-
-            pallet.width *
-
-            scale
-
-        )
-
-        /2;
-
-
-
-
-
-
-
-
-    ctx.save();
+        );
 
 
 
@@ -420,11 +454,7 @@ function drawPallet2D(){
 
     ctx.fillStyle =
 
-        "#d6b27c";
-
-
-
-
+        "#c8a165";
 
 
 
@@ -432,9 +462,9 @@ function drawPallet2D(){
 
 
 
-        offsetX,
+        offset.x,
 
-        offsetY,
+        offset.y,
 
 
 
@@ -460,11 +490,7 @@ function drawPallet2D(){
 
     ctx.strokeStyle =
 
-        "#795548";
-
-
-
-
+        "#654321";
 
 
 
@@ -472,9 +498,9 @@ function drawPallet2D(){
 
 
 
-        offsetX,
+        offset.x,
 
-        offsetY,
+        offset.y,
 
 
 
@@ -491,14 +517,6 @@ function drawPallet2D(){
 
 
     );
-
-
-
-
-
-
-
-    ctx.restore();
 
 
 
@@ -521,49 +539,19 @@ function drawBox2D(
 
     box,
 
-    showLayer
+    pallet
 
 ){
 
 
 
-    const pallet =
-
-        currentResult.pallet ||
-
-        {
-
-            length:1200,
-
-            width:800
-
-        };
-
-
-
-
-
-
-
     const scale =
 
-        Math.min(
+        get2DScale(
 
-            canvas.width /
+            pallet
 
-            pallet.length,
-
-
-
-            canvas.height /
-
-            pallet.width
-
-        )
-
-        *
-
-        0.75;
+        );
 
 
 
@@ -571,39 +559,16 @@ function drawBox2D(
 
 
 
-    const offsetX =
+    const offset =
 
-        (
+        get2DOffset(
 
-            canvas.width -
-
-            pallet.length *
+            pallet,
 
             scale
 
-        )
+        );
 
-        /2;
-
-
-
-
-
-
-
-    const offsetY =
-
-        (
-
-            canvas.height -
-
-            pallet.width *
-
-            scale
-
-        )
-
-        /2;
 
 
 
@@ -623,7 +588,7 @@ function drawBox2D(
 
 
 
-        offsetX +
+        offset.x +
 
         box.x *
 
@@ -631,7 +596,7 @@ function drawBox2D(
 
 
 
-        offsetY +
+        offset.y +
 
         box.y *
 
@@ -649,7 +614,11 @@ function drawBox2D(
 
     ctx.fillStyle =
 
-        "#c9a66b";
+        getLayerColor(
+
+            box.layer
+
+        );
 
 
 
@@ -659,8 +628,7 @@ function drawBox2D(
 
     ctx.strokeStyle =
 
-        "#5d4037";
-
+        "#333";
 
 
 
@@ -728,10 +696,8 @@ function drawBox2D(
 
 
 
-    // Richtungspfeil
 
-
-    drawDirectionArrow(
+    drawArrow2D(
 
         box,
 
@@ -750,12 +716,255 @@ function drawBox2D(
 
 
 }
+
+
+
+
+
+
+
+
+
+// ======================================
+// Maßstab
+// ======================================
+
+
+function get2DScale(
+
+    pallet
+
+){
+
+
+
+    return Math.min(
+
+
+
+        canvas.width /
+
+        pallet.length,
+
+
+
+        canvas.height /
+
+        pallet.width
+
+
+
+    )
+
+    *
+
+    0.75;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function get2DOffset(
+
+    pallet,
+
+    scale
+
+){
+
+
+
+    return {
+
+
+
+        x:
+
+        (
+
+            canvas.width -
+
+            pallet.length *
+
+            scale
+
+        )
+
+        /2,
+
+
+
+        y:
+
+        (
+
+            canvas.height -
+
+            pallet.width *
+
+            scale
+
+        )
+
+        /2
+
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Pfeil 2D
+// ======================================
+
+
+function drawArrow2D(
+
+    box,
+
+    scale
+
+){
+
+
+
+    ctx.strokeStyle =
+
+        "red";
+
+
+
+    ctx.lineWidth = 2;
+
+
+
+
+
+
+
+    ctx.beginPath();
+
+
+
+
+
+
+
+    if(
+
+        box.length >= box.width
+
+    ){
+
+
+
+        ctx.moveTo(
+
+            10,
+
+            box.width *
+
+            scale /
+
+            2
+
+        );
+
+
+
+        ctx.lineTo(
+
+            box.length *
+
+            scale -
+
+            10,
+
+            box.width *
+
+            scale /
+
+            2
+
+        );
+
+
+
+    }
+
+    else{
+
+
+
+        ctx.moveTo(
+
+            box.length *
+
+            scale /
+
+            2,
+
+            10
+
+        );
+
+
+
+        ctx.lineTo(
+
+            box.length *
+
+            scale /
+
+            2,
+
+            box.width *
+
+            scale -
+
+            10
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+    ctx.stroke();
+
+
+
+}
 /*
 ==================================================
- Europal Optimizer Pro
  canvas.js
  Teil 3
- 3D Projektion
+ 3D Basis
 ==================================================
 */
 
@@ -766,13 +975,31 @@ function drawBox2D(
 // ======================================
 
 
-function draw3DView(){
+function draw3DView(
+
+    variant,
+
+    pallet
+
+){
+
+
+
+    drawPallet3D(
+
+        pallet
+
+    );
+
+
+
+
 
 
 
     const boxes =
 
-        currentResult.boxes;
+        [...variant.boxes];
 
 
 
@@ -780,15 +1007,7 @@ function draw3DView(){
 
 
 
-    drawPallet3D();
-
-
-
-
-
-
-
-    // hintere Kartons zuerst zeichnen
+    // hinten zuerst zeichnen
 
 
     boxes.sort((a,b)=>{
@@ -797,9 +1016,9 @@ function draw3DView(){
 
         return (
 
-            a.z +
+            a.y +
 
-            a.y
+            a.z
 
         )
 
@@ -807,9 +1026,9 @@ function draw3DView(){
 
         (
 
-            b.z +
+            b.y +
 
-            b.y
+            b.z
 
         );
 
@@ -829,7 +1048,9 @@ function draw3DView(){
 
         drawBox3D(
 
-            box
+            box,
+
+            pallet
 
         );
 
@@ -860,64 +1081,51 @@ function project3D(
 
     y,
 
-    z
+    z,
+
+    pallet
 
 ){
 
 
 
-    const scale = 0.55;
+    const scale =
 
 
 
+        Math.min(
 
 
 
+            canvas.width /
 
-    const isoX =
+            (
+
+                pallet.length +
+
+                pallet.width
+
+            ),
 
 
 
-        (
+            canvas.height /
 
-            x -
+            (
 
-            y
+                pallet.length +
+
+                pallet.width
+
+            )
+
+
 
         )
 
         *
 
-        scale;
-
-
-
-
-
-
-
-    const isoY =
-
-
-
-        (
-
-            x +
-
-            y
-
-        )
-
-        *
-
-        0.25
-
-        -
-
-        z *
-
-        0.65;
-
+        0.8;
 
 
 
@@ -931,17 +1139,68 @@ function project3D(
 
         x:
 
-        canvas.width/2 +
 
-        isoX,
+
+            canvas.width/2
+
+            +
+
+            (
+
+                x -
+
+                y
+
+            )
+
+            *
+
+            scale,
+
+
+
+
+
 
 
 
         y:
 
-        canvas.height*0.75 +
 
-        isoY
+
+            canvas.height *
+
+            0.65
+
+            +
+
+            (
+
+                x +
+
+                y
+
+            )
+
+            *
+
+            scale
+
+            *
+
+            0.45
+
+            -
+
+            z
+
+            *
+
+            scale
+
+            *
+
+            0.7
 
 
 
@@ -960,28 +1219,19 @@ function project3D(
 
 
 // ======================================
-// Palette 3D Boden
+// Palette 3D
 // ======================================
 
 
-function drawPallet3D(){
+function drawPallet3D(
+
+    pallet
+
+){
 
 
 
-    const pallet =
-
-        currentResult.pallet ||
-
-        {
-
-            length:1200,
-
-            width:800,
-
-            height:150
-
-        };
-
+    const z = 0;
 
 
 
@@ -997,7 +1247,9 @@ function drawPallet3D(){
 
             0,
 
-            0
+            z,
+
+            pallet
 
         );
 
@@ -1015,7 +1267,9 @@ function drawPallet3D(){
 
             0,
 
-            0
+            z,
+
+            pallet
 
         );
 
@@ -1033,7 +1287,9 @@ function drawPallet3D(){
 
             pallet.width,
 
-            0
+            z,
+
+            pallet
 
         );
 
@@ -1051,27 +1307,11 @@ function drawPallet3D(){
 
             pallet.width,
 
-            0
+            z,
+
+            pallet
 
         );
-
-
-
-
-
-
-
-    ctx.save();
-
-
-
-
-
-
-
-    ctx.fillStyle =
-
-        "#b88a52";
 
 
 
@@ -1127,6 +1367,16 @@ function drawPallet3D(){
 
 
 
+
+
+
+
+    ctx.fillStyle =
+
+        "#b88652";
+
+
+
     ctx.fill();
 
 
@@ -1137,7 +1387,7 @@ function drawPallet3D(){
 
     ctx.strokeStyle =
 
-        "#6d4c41";
+        "#5d4037";
 
 
 
@@ -1145,18 +1395,9 @@ function drawPallet3D(){
 
 
 
-
-
-
-
-    ctx.restore();
-
-
-
 }
 /*
 ==================================================
- Europal Optimizer Pro
  canvas.js
  Teil 4
  3D Karton Darstellung
@@ -1166,13 +1407,15 @@ function drawPallet3D(){
 
 
 // ======================================
-// 3D Karton zeichnen
+// Karton 3D zeichnen
 // ======================================
 
 
 function drawBox3D(
 
-    box
+    box,
+
+    pallet
 
 ){
 
@@ -1194,8 +1437,7 @@ function drawBox3D(
 
 
 
-
-    // Rotation berücksichtigen
+    // Drehung berücksichtigen
 
 
     if(
@@ -1226,10 +1468,9 @@ function drawBox3D(
 
 
 
-
     const z =
 
-        box.z;
+        box.z || 0;
 
 
 
@@ -1239,7 +1480,7 @@ function drawBox3D(
 
     const h =
 
-        box.height;
+        box.height || 0;
 
 
 
@@ -1247,126 +1488,125 @@ function drawBox3D(
 
 
 
+    // Untere Ebene
 
-    // Untere Punkte
 
+    const p1 = project3D(
 
-    const p1 =
+        box.x,
 
-        project3D(
+        box.y,
 
-            box.x,
+        z,
 
-            box.y,
+        pallet
 
-            z
+    );
 
-        );
 
 
+    const p2 = project3D(
 
-    const p2 =
+        box.x + length,
 
-        project3D(
+        box.y,
 
-            box.x + length,
+        z,
 
-            box.y,
+        pallet
 
-            z
+    );
 
-        );
 
 
+    const p3 = project3D(
 
-    const p3 =
+        box.x + length,
 
-        project3D(
+        box.y + width,
 
-            box.x + length,
+        z,
 
-            box.y + width,
+        pallet
 
-            z
+    );
 
-        );
 
 
+    const p4 = project3D(
 
-    const p4 =
+        box.x,
 
-        project3D(
+        box.y + width,
 
-            box.x,
+        z,
 
-            box.y + width,
+        pallet
 
-            z
+    );
 
-        );
 
 
 
 
 
 
+    // Obere Ebene
 
-    // Obere Punkte
 
+    const t1 = project3D(
 
-    const t1 =
+        box.x,
 
-        project3D(
+        box.y,
 
-            box.x,
+        z+h,
 
-            box.y,
+        pallet
 
-            z+h
+    );
 
-        );
 
 
+    const t2 = project3D(
 
-    const t2 =
+        box.x + length,
 
-        project3D(
+        box.y,
 
-            box.x + length,
+        z+h,
 
-            box.y,
+        pallet
 
-            z+h
+    );
 
-        );
 
 
+    const t3 = project3D(
 
-    const t3 =
+        box.x + length,
 
-        project3D(
+        box.y + width,
 
-            box.x + length,
+        z+h,
 
-            box.y + width,
+        pallet
 
-            z+h
+    );
 
-        );
 
 
+    const t4 = project3D(
 
-    const t4 =
+        box.x,
 
-        project3D(
+        box.y + width,
 
-            box.x,
+        z+h,
 
-            box.y + width,
+        pallet
 
-            z+h
-
-        );
+    );
 
 
 
@@ -1385,65 +1625,23 @@ function drawBox3D(
     // Oberseite
 
 
-    ctx.fillStyle =
+    drawPolygon3D(
 
-        "#d9bf91";
+        [
 
+            t1,
 
+            t2,
 
-    ctx.beginPath();
+            t3,
 
+            t4
 
+        ],
 
-    ctx.moveTo(
-
-        t1.x,
-
-        t1.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        t2.x,
-
-        t2.y
+        "#d9b77a"
 
     );
-
-
-
-    ctx.lineTo(
-
-        t3.x,
-
-        t3.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        t4.x,
-
-        t4.y
-
-    );
-
-
-
-    ctx.closePath();
-
-
-
-    ctx.fill();
-
-
-
-    ctx.stroke();
 
 
 
@@ -1455,159 +1653,52 @@ function drawBox3D(
     // Vorderseite
 
 
-    ctx.fillStyle =
+    drawPolygon3D(
 
-        "#b98b55";
+        [
 
+            p4,
 
+            p3,
 
-    ctx.beginPath();
+            t3,
 
+            t4
 
+        ],
 
-    ctx.moveTo(
-
-        p4.x,
-
-        p4.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        p3.x,
-
-        p3.y
+        "#b9874f"
 
     );
 
 
 
-    ctx.lineTo(
-
-        t3.x,
-
-        t3.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        t4.x,
-
-        t4.y
-
-    );
-
-
-
-    ctx.closePath();
-
-
-
-    ctx.fill();
-
-
-
-    ctx.stroke();
 
 
 
 
 
+    // rechte Seite
 
 
+    drawPolygon3D(
 
-    // Seitenfläche
+        [
 
+            p2,
 
-    ctx.fillStyle =
+            p3,
 
-        "#a87545";
+            t3,
 
+            t2
 
+        ],
 
-    ctx.beginPath();
-
-
-
-    ctx.moveTo(
-
-        p2.x,
-
-        p2.y
+        "#986738"
 
     );
 
-
-
-    ctx.lineTo(
-
-        p3.x,
-
-        p3.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        t3.x,
-
-        t3.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        t2.x,
-
-        t2.y
-
-    );
-
-
-
-    ctx.closePath();
-
-
-
-    ctx.fill();
-
-
-
-    ctx.stroke();
-
-
-
-
-
-
-
-
-    // Richtungspfeil
-
-
-    drawDirectionArrow3D(
-
-        box,
-
-        t1,
-
-        t2,
-
-        t3,
-
-        t4
-
-    );
 
 
 
@@ -1620,80 +1711,27 @@ function drawBox3D(
 
 
 }
-/*
-==================================================
- Europal Optimizer Pro
- canvas.js
- Teil 5
- Richtungspfeile
-==================================================
-*/
+
+
+
+
+
+
 
 
 
 // ======================================
-// 2D Richtungspfeil
+// Polygon zeichnen
 // ======================================
 
 
-function drawDirectionArrow(
+function drawPolygon3D(
 
-    box,
+    points,
 
-    scale
+    color
 
 ){
-
-
-
-    let length = box.length;
-
-
-
-    let width = box.width;
-
-
-
-
-
-
-
-    ctx.save();
-
-
-
-
-
-
-
-    ctx.strokeStyle =
-
-        "#d32f2f";
-
-
-
-    ctx.fillStyle =
-
-        "#d32f2f";
-
-
-
-    ctx.lineWidth = 3;
-
-
-
-
-
-
-
-    let horizontal =
-
-        length >= width;
-
-
-
-
-
 
 
 
@@ -1701,67 +1739,37 @@ function drawDirectionArrow(
 
 
 
+    ctx.moveTo(
+
+        points[0].x,
+
+        points[0].y
+
+    );
 
 
 
 
-    if(horizontal){
 
 
 
-        ctx.moveTo(
+    for(
 
-            5,
+        let i=1;
 
-            width *
+        i<points.length;
 
-            scale / 2
+        i++
 
-        );
-
-
-
-        ctx.lineTo(
-
-            length *
-
-            scale - 5,
-
-            width *
-
-            scale / 2
-
-        );
-
-
-
-    }
-
-    else{
-
-
-
-        ctx.moveTo(
-
-            length *
-
-            scale / 2,
-
-            5
-
-        );
+    ){
 
 
 
         ctx.lineTo(
 
-            length *
+            points[i].x,
 
-            scale / 2,
-
-            width *
-
-            scale - 5
+            points[i].y
 
         );
 
@@ -1772,6 +1780,26 @@ function drawDirectionArrow(
 
 
 
+
+
+
+    ctx.closePath();
+
+
+
+    ctx.fillStyle =
+
+        color;
+
+
+
+    ctx.fill();
+
+
+
+    ctx.strokeStyle =
+
+        "#4a3728";
 
 
 
@@ -1779,12 +1807,65 @@ function drawDirectionArrow(
 
 
 
+}
+/*
+==================================================
+ canvas.js
+ Teil 5
+ Abschluss
+==================================================
+*/
+
+
+
+// ======================================
+// Farbe je Lage
+// ======================================
+
+
+function getLayerColor(
+
+    layer
+
+){
+
+
+
+    const colors = [
+
+
+
+        "#c89b5b",
+
+        "#d7b477",
+
+        "#b88950",
+
+        "#e0c28c"
+
+
+
+    ];
 
 
 
 
 
-    ctx.restore();
+
+
+    return colors[
+
+        (
+
+            layer - 1
+
+        )
+
+        %
+
+        colors.length
+
+    ];
 
 
 
@@ -1803,17 +1884,11 @@ function drawDirectionArrow(
 // ======================================
 
 
-function drawDirectionArrow3D(
+function drawArrow3D(
 
     box,
 
-    p1,
-
-    p2,
-
-    p3,
-
-    p4
+    pallet
 
 ){
 
@@ -1829,27 +1904,56 @@ function drawDirectionArrow3D(
 
 
 
-    const longSide =
+    const z =
+
+        box.z +
+
+        box.height +
+
+        2;
 
 
 
-        box.length >=
-
-        box.width;
 
 
 
 
 
+    if(
+
+        box.length >= box.width
+
+    ){
 
 
-    if(longSide){
+
+        start = project3D(
+
+            box.x + 20,
+
+            box.y + box.width/2,
+
+            z,
+
+            pallet
+
+        );
 
 
 
-        start = p1;
 
-        end = p2;
+
+        end = project3D(
+
+            box.x + box.length - 20,
+
+            box.y + box.width/2,
+
+            z,
+
+            pallet
+
+        );
 
 
 
@@ -1859,9 +1963,33 @@ function drawDirectionArrow3D(
 
 
 
-        start = p1;
+        start = project3D(
 
-        end = p4;
+            box.x + box.length/2,
+
+            box.y + 20,
+
+            z,
+
+            pallet
+
+        );
+
+
+
+
+
+        end = project3D(
+
+            box.x + box.length/2,
+
+            box.y + box.width - 20,
+
+            z,
+
+            pallet
+
+        );
 
 
 
@@ -1873,18 +2001,9 @@ function drawDirectionArrow3D(
 
 
 
-
-    ctx.save();
-
-
-
-
-
-
-
     ctx.strokeStyle =
 
-        "#ff0000";
+        "red";
 
 
 
@@ -1924,47 +2043,6 @@ function drawDirectionArrow3D(
 
 
 
-
-
-
-
-    ctx.restore();
-
-
-
-}
-/*
-==================================================
- Europal Optimizer Pro
- canvas.js
- Teil 6
- Abschluss
-==================================================
-*/
-
-
-
-// ======================================
-// Alle Ebenen zeichnen
-// ======================================
-
-
-function drawAllLayers(){
-
-
-
-    currentView = "top";
-
-
-
-    currentLayer = 0;
-
-
-
-    drawCanvas();
-
-
-
 }
 
 
@@ -1976,236 +2054,47 @@ function drawAllLayers(){
 
 
 // ======================================
-// Nur eine Lage zeichnen
+// Tastatur Steuerung optional
 // ======================================
 
 
-function drawSingleLayer(
+document.addEventListener(
 
-    layer
+    "keydown",
 
-){
+    function(e){
 
 
 
-    currentView = "layer";
+        if(e.key==="1"){
 
 
 
-    currentLayer = layer;
+            setCanvasMode(
 
+                "top"
 
+            );
 
-    drawCanvas();
 
 
+        }
 
-}
 
 
 
 
 
 
+        if(e.key==="2"){
 
 
 
-// ======================================
-// 3D Ansicht öffnen
-// ======================================
+            setCanvasMode(
 
+                "3d"
 
-function draw3D(){
-
-
-
-    currentView = "3d";
-
-
-
-    currentLayer = 0;
-
-
-
-    drawCanvas();
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Karton Farbe nach Lage
-// ======================================
-
-
-function getLayerColor(
-
-    layer
-
-){
-
-
-
-    const colors = [
-
-
-
-        "#c89b5b",
-
-        "#d7b477",
-
-        "#b8894d",
-
-        "#e0c08a"
-
-
-
-    ];
-
-
-
-
-
-
-
-    return colors[
-
-        (
-
-            layer - 1
-
-        )
-
-        %
-
-        colors.length
-
-    ];
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Canvas Größe anpassen
-// ======================================
-
-
-function resizeCanvas(){
-
-
-
-    if(!canvas){
-
-        return;
-
-    }
-
-
-
-
-
-
-
-    canvas.width =
-
-        canvas.clientWidth;
-
-
-
-
-
-
-
-    canvas.height =
-
-        canvas.clientHeight;
-
-
-
-
-
-
-
-    drawCanvas();
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Fensteränderung
-// ======================================
-
-
-window.addEventListener(
-
-    "resize",
-
-    resizeCanvas
-
-);
-
-
-
-
-
-
-
-
-
-// ======================================
-// Automatisch starten
-// ======================================
-
-
-window.addEventListener(
-
-    "load",
-
-    ()=>{
-
-
-
-        const c =
-
-        document.getElementById(
-
-            "canvas"
-
-        );
-
-
-
-        if(c){
-
-
-
-            initCanvas();
+            );
 
 
 
@@ -2227,6 +2116,6 @@ window.addEventListener(
 
 console.log(
 
-    "Canvas Version 30.0 geladen"
+    "Canvas Version 40.0 geladen"
 
 );
