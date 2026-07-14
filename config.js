@@ -1,55 +1,100 @@
 /*
 ==================================================
  Europal Optimizer Pro
- Konfiguration
+ Config
+ Version 2.0
 ==================================================
 */
 
-const APP = {
-    name: "Europal Optimizer Pro",
-    version: "0.1.0"
-};
+const SETTINGS = {
 
-const PALLETS = {
+    // Standardwerte
+    defaultMaxHeight: 1800,
 
-    euro: {
-        id: "euro",
-        name: "Europalette",
-        length: 1200,
-        width: 800,
-        height: 144
+    // Zeichenbereich
+    canvas: {
+
+        background: "#f8fafc",
+
+        margin: 40
+
     },
 
-    industry: {
-        id: "industry",
-        name: "Industriepalette",
-        length: 1200,
-        width: 1000,
-        height: 144
+    // Isometrie
+    iso: {
+
+        scale: 0.18,
+
+        startX: 260,
+
+        startY: 520
+
     }
 
 };
 
-const SETTINGS = {
+// ==============================
+// Paletten
+// ==============================
 
-    defaultPallet: "euro",
+const PALLETS = {
 
-    defaultMaxHeight: 1800,
+    euro: {
 
-    optimization: "balanced"
+        id: "euro",
+
+        name: "Europalette",
+
+        length: 1200,
+
+        width: 800,
+
+        height: 144,
+
+        maxWeight: 1500
+
+    },
+
+    industry: {
+
+        id: "industry",
+
+        name: "Industriepalette",
+
+        length: 1200,
+
+        width: 1000,
+
+        height: 144,
+
+        maxWeight: 1500
+
+    }
 
 };
 
+// ==============================
+// Farben
+// ==============================
+
 const COLORS = {
 
-    pallet: "#555",
+    palletTop: "#D7B37A",
 
-    carton: "#4CAF50",
+    palletSide: "#B98954",
 
-    cartonBorder: "#2E7D32",
+    palletDark: "#8D633B",
 
-    background: "#EEF2F7",
+    boxTop: "#D9C6A3",
 
-    selected: "#1565C0"
+    boxFront: "#C7AE84",
+
+    boxSide: "#B69568",
+
+    boxBorder: "#6D573B",
+
+    shadow: "rgba(0,0,0,0.12)",
+
+    background: "#F5F7FA"
 
 };
