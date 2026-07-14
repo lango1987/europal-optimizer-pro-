@@ -2,110 +2,237 @@
 ==================================================
  Europal Optimizer Pro
  App
- Version 0.3.0
+ Version 1.0
 ==================================================
 */
-
-document.addEventListener("DOMContentLoaded", initApp);
 
 let currentView = "top";
 
 let currentJob = null;
+
 let currentVariant = null;
 
-function initApp() {
 
-    document.getElementById("maxHeight").value =
-        SETTINGS.defaultMaxHeight;
+document.addEventListener(
+    "DOMContentLoaded",
+    initApp
+);
 
-    document
-        .getElementById("calculate")
-        .addEventListener("click", calculate);
 
-    addViewEvents();
+function initApp(){
+
+    const maxHeight =
+        document.getElementById("maxHeight");
+
+
+    if(maxHeight){
+
+        maxHeight.value =
+            SETTINGS.defaultMaxHeight;
+
+    }
+
+
+    const calculate =
+        document.getElementById("calculate");
+
+
+    if(calculate){
+
+        calculate.addEventListener(
+            "click",
+            calculateOptimization
+        );
+
+    }
+
+
+    setupButtons();
 
 }
 
-function calculate() {
 
-    const palletKey =
-        document.getElementById("pallet").value;
 
-    currentJob = {
+// =======================================
+// Berechnung
+// =======================================
 
-        pallet: PALLETS[palletKey],
+function calculateOptimization(){
+
+    const palletSelect =
+        document.getElementById("pallet");
+
+
+    const job = {
+
+        pallet:
+            PALLETS[palletSelect.value],
+
 
         box: {
 
-            length: Number(document.getElementById("length").value),
+            length:
+                Number(
+                    document.getElementById("length").value
+                ),
 
-            width: Number(document.getElementById("width").value),
+            width:
+                Number(
+                    document.getElementById("width").value
+                ),
 
-            height: Number(document.getElementById("height").value),
+            height:
+                Number(
+                    document.getElementById("height").value
+                ),
 
-            weight: Number(document.getElementById("weight").value)
+            weight:
+                Number(
+                    document.getElementById("weight").value
+                )
 
         },
 
+
         settings: {
 
-            maxHeight: Number(document.getElementById("maxHeight").value)
+            maxHeight:
+                Number(
+                    document.getElementById("maxHeight").value
+                )
 
         }
 
     };
 
-    if (
 
-        currentJob.box.length <= 0 ||
-        currentJob.box.width <= 0 ||
-        currentJob.box.height <= 0
+    if(
 
-    ) {
+        !job.pallet ||
 
-        alert("Bitte gültige Kartonmaße eingeben.");
+        job.box.length <=0 ||
+
+        job.box.width <=0 ||
+
+        job.box.height <=0
+
+    ){
+
+        alert(
+            "Bitte gültige Kartondaten eingeben."
+        );
+
+        return;
+
+    }
+
+
+
+    const variants =
+        optimize(job);
+
+
+
+    if(
+        !variants ||
+        variants.length===0
+    ){
+
+        alert(
+            "Keine Optimierung möglich."
+        );
 
         return;
 
     }
 
-    const variants = optimize(currentJob);
 
-    if (!variants.length) {
-
-        alert("Keine Variante gefunden.");
-
-        return;
-
-    }
+    currentJob = job;
 
     currentVariant = variants[0];
 
-    updateDashboard();
+
+    updateDashboard(
+        currentVariant
+    );
+
 
     drawCurrentView();
 
 }
 
-function updateDashboard() {
 
-    document.getElementById("layer").textContent =
-        currentVariant.cartonsPerLayer;
 
-    document.getElementById("layers").textContent =
-        currentVariant.layers;
+// =======================================
+// Dashboard
+// =======================================
 
-    document.getElementById("total").textContent =
-        currentVariant.totalCartons;
+function updateDashboard(result){
 
-    document.getElementById("utilization").textContent =
-        currentVariant.utilization + " %";
+
+    const layer =
+        document.getElementById("layer");
+
+
+    const layers =
+        document.getElementById("layers");
+
+
+    const total =
+        document.getElementById("total");
+
+
+    const util =
+        document.getElementById("utilization");
+
+
+
+    if(layer)
+
+        layer.textContent =
+            result.cartonsPerLayer;
+
+
+
+    if(layers)
+
+        layers.textContent =
+            result.layers;
+
+
+
+    if(total)
+
+        total.textContent =
+            result.totalCartons;
+
+
+
+    if(util)
+
+        util.textContent =
+            result.utilization+" %";
+
 
 }
 
-function drawCurrentView() {
 
-    if (!currentVariant) return;
+
+// =======================================
+// Zeichnen
+// =======================================
+
+function drawCurrentView(){
+
+    if(
+        !currentVariant ||
+        !currentJob
+    ){
+
+        return;
+
+    }
+
 
     drawVariant(
 
@@ -119,48 +246,57 @@ function drawCurrentView() {
 
 }
 
-function addViewEvents() {
 
-    const views = {
 
-        viewTop: "top",
+// =======================================
+// Buttons
+// =======================================
 
-        viewIso: "iso",
+function setupButtons(){
 
-        viewLayer1: "layer1",
 
-        viewLayer2: "layer2"
+    const buttons = {
+
+        viewTop:"top",
+
+        viewIso:"iso",
+
+        viewLayer1:"layer1",
+
+        viewLayer2:"layer2"
 
     };
 
-    Object.keys(views).forEach(id => {
 
-        const button = document.getElementById(id);
+    Object.keys(buttons)
+    .forEach(id=>{
 
-        if (!button) return;
 
-        button.addEventListener("click", () => {
+        const button =
+            document.getElementById(id);
 
-            currentView = views[id];
 
-            document
-                .querySelectorAll(".viewButton")
-                .forEach(btn => {
 
-                    btn.classList.remove("btn-primary");
+        if(!button)
 
-                    btn.classList.add("btn-outline-primary");
+            return;
 
-                });
 
-            button.classList.remove("btn-outline-primary");
 
-            button.classList.add("btn-primary");
+        button.onclick=function(){
+
+
+            currentView =
+                buttons[id];
+
 
             drawCurrentView();
 
-        });
+
+        };
+
 
     });
+
 
 }
