@@ -90,18 +90,72 @@ function calculatePattern(job, pattern) {
 
         utilization,
 
-        boxes: createBoxes(
-            cols,
-            rows,
-            boxLength,
-            boxWidth
-        )
+  boxes: createBoxes(
+
+    cols,
+
+    rows,
+
+    layers,
+
+    boxLength,
+
+    boxWidth,
+
+    job.box.height
+
+)     
 
     };
 
 }
 
-function createBoxes(cols, rows, boxLength, boxWidth) {
+function createBoxes(
+    cols,
+    rows,
+    layers,
+    boxLength,
+    boxWidth,
+    boxHeight
+) {
+
+    const boxes = [];
+
+    for (let layer = 0; layer < layers; layer++) {
+
+        for (let row = 0; row < rows; row++) {
+
+            for (let col = 0; col < cols; col++) {
+
+                boxes.push({
+
+                    x: col * boxLength,
+
+                    y: row * boxWidth,
+
+                    z: layer * boxHeight,
+
+                    length: boxLength,
+
+                    width: boxWidth,
+
+                    height: boxHeight,
+
+                    rotation: 0,
+
+                    layer: layer + 1
+
+                });
+
+            }
+
+        }
+
+    }
+
+    return boxes;
+
+}
 
     const boxes = [];
 
