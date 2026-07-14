@@ -2,46 +2,78 @@
 ==================================================
  Europal Optimizer Pro
  canvas.js
- kompatibel mit app.js
- Version 40.0
+ Version 1.0
 ==================================================
 */
 
 
 let canvas;
+
 let ctx;
 
 
+let currentVariant = null;
 
-let canvasMode = "top";
+let currentPallet = null;
 
-let selectedLayer = 0;
+
+let currentMode = "top";
+
+let currentLayer = 1;
+
+
+
+
 
 
 
 // ======================================
-// Hauptfunktion aus app.js
+// Canvas starten
 // ======================================
 
 
-function drawVariant(
-
-    canvasId,
-
-    variant,
-
-    pallet
-
-){
-
+function initCanvas(){
 
 
     canvas = document.getElementById(
-
-        canvasId
-
+        "canvas"
     );
 
+
+    ctx = canvas.getContext(
+        "2d"
+    );
+
+
+    resizeCanvas();
+
+
+}
+
+
+
+
+
+
+
+
+
+window.addEventListener(
+
+    "resize",
+
+    resizeCanvas
+
+);
+
+
+
+
+
+
+
+
+function resizeCanvas(){
 
 
     if(!canvas){
@@ -52,97 +84,15 @@ function drawVariant(
 
 
 
-    ctx = canvas.getContext(
+    canvas.width =
 
-        "2d"
+        canvas.clientWidth;
 
-    );
 
 
+    canvas.height =
 
-    canvas.width = canvas.clientWidth;
-
-    canvas.height = canvas.clientHeight;
-
-
-
-    variant.pallet = pallet;
-
-
-
-    window.currentVariant = variant;
-
-
-
-    clearCanvas();
-
-
-
-
-
-
-
-    if(canvasMode === "top"){
-
-
-
-        drawTopView(
-
-            variant,
-
-            pallet
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-    else if(canvasMode === "3d"){
-
-
-
-        draw3DView(
-
-            variant,
-
-            pallet
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-    else if(canvasMode === "layer"){
-
-
-
-        drawLayerView(
-
-            variant,
-
-            pallet,
-
-            selectedLayer
-
-        );
-
-
-
-    }
+        canvas.clientHeight;
 
 
 
@@ -157,39 +107,40 @@ function drawVariant(
 
 
 // ======================================
-// Ansicht wechseln
+// Von app.js aufgerufen
 // ======================================
 
 
-function setCanvasMode(
+function drawVariant(
 
-    mode
+    id,
+
+    variant,
+
+    pallet
 
 ){
 
 
 
-    canvasMode = mode;
+    if(!ctx){
 
-
-
-    if(window.currentVariant){
-
-
-
-        drawVariant(
-
-            "canvas",
-
-            window.currentVariant,
-
-            window.currentVariant.pallet
-
-        );
-
-
+        initCanvas();
 
     }
+
+
+
+
+
+    currentVariant = variant;
+
+
+    currentPallet = pallet;
+
+
+
+    draw();
 
 
 
@@ -202,12 +153,37 @@ function setCanvasMode(
 
 
 
+
 // ======================================
-// Lage auswählen
+// Ansicht ändern
 // ======================================
 
 
-function setCanvasLayer(
+function setView(
+
+    view
+
+){
+
+
+
+    currentMode = view;
+
+
+    draw();
+
+
+
+}
+
+
+
+
+
+
+
+
+function setLayer(
 
     layer
 
@@ -215,31 +191,13 @@ function setCanvasLayer(
 
 
 
-    selectedLayer = layer;
+    currentLayer = layer;
 
 
-
-    canvasMode = "layer";
-
+    currentMode = "layer";
 
 
-    if(window.currentVariant){
-
-
-
-        drawVariant(
-
-            "canvas",
-
-            window.currentVariant,
-
-            window.currentVariant.pallet
-
-        );
-
-
-
-    }
+    draw();
 
 
 
@@ -252,7 +210,21 @@ function setCanvasLayer(
 
 
 
-function clearCanvas(){
+
+// ======================================
+// Hauptzeichnung
+// ======================================
+
+
+function draw(){
+
+
+
+    if(!currentVariant){
+
+        return;
+
+    }
 
 
 
@@ -270,14 +242,55 @@ function clearCanvas(){
 
 
 
+
+
+
+
+    if(currentMode==="top"){
+
+
+
+        drawTop();
+
+    }
+
+
+
+
+
+
+
+    if(currentMode==="layer"){
+
+
+
+        drawLayer();
+
+    }
+
+
+
+
+
+
+
+    if(currentMode==="3d"){
+
+
+
+        draw3D();
+
+    }
+
+
+
 }
-/*
-==================================================
- canvas.js
- Teil 2
- 2D Darstellung
-==================================================
-*/
+
+
+
+
+
+
 
 
 
@@ -286,40 +299,18 @@ function clearCanvas(){
 // ======================================
 
 
-function drawTopView(
-
-    variant,
-
-    pallet
-
-){
+function drawTop(){
 
 
 
-    drawPallet2D(
-
-        pallet
-
-    );
+    drawPallet2D();
 
 
 
+    currentVariant.boxes.forEach(box=>{
 
 
-
-
-    variant.boxes.forEach(box=>{
-
-
-
-        drawBox2D(
-
-            box,
-
-            pallet
-
-        );
-
+        drawBox2D(box);
 
 
     });
@@ -337,27 +328,15 @@ function drawTopView(
 
 
 // ======================================
-// Einzelne Lage
+// einzelne Lage
 // ======================================
 
 
-function drawLayerView(
-
-    variant,
-
-    pallet,
-
-    layer
-
-){
+function drawLayer(){
 
 
 
-    drawPallet2D(
-
-        pallet
-
-    );
+    drawPallet2D();
 
 
 
@@ -365,18 +344,12 @@ function drawLayerView(
 
 
 
-    variant.boxes
+    currentVariant.boxes
 
     .filter(box=>{
 
 
-
-        return (
-
-            box.layer === layer
-
-        );
-
+        return box.layer===currentLayer;
 
 
     })
@@ -384,15 +357,7 @@ function drawLayerView(
     .forEach(box=>{
 
 
-
-        drawBox2D(
-
-            box,
-
-            pallet
-
-        );
-
+        drawBox2D(box);
 
 
     });
@@ -414,47 +379,18 @@ function drawLayerView(
 // ======================================
 
 
-function drawPallet2D(
-
-    pallet
-
-){
+function drawPallet2D(){
 
 
 
     const scale =
 
-        get2DScale(
-
-            pallet
-
-        );
+        getScale();
 
 
 
 
-
-
-
-    const offset =
-
-        get2DOffset(
-
-            pallet,
-
-            scale
-
-        );
-
-
-
-
-
-
-
-    ctx.fillStyle =
-
-        "#c8a165";
+    ctx.fillStyle="#d0a060";
 
 
 
@@ -462,57 +398,13 @@ function drawPallet2D(
 
 
 
-        offset.x,
+        100,
 
-        offset.y,
+        80,
 
+        currentPallet.length*scale,
 
-
-        pallet.length *
-
-        scale,
-
-
-
-        pallet.width *
-
-        scale
-
-
-
-    );
-
-
-
-
-
-
-
-    ctx.strokeStyle =
-
-        "#654321";
-
-
-
-    ctx.strokeRect(
-
-
-
-        offset.x,
-
-        offset.y,
-
-
-
-        pallet.length *
-
-        scale,
-
-
-
-        pallet.width *
-
-        scale
+        currentPallet.width*scale
 
 
 
@@ -537,9 +429,7 @@ function drawPallet2D(
 
 function drawBox2D(
 
-    box,
-
-    pallet
+    box
 
 ){
 
@@ -547,66 +437,7 @@ function drawBox2D(
 
     const scale =
 
-        get2DScale(
-
-            pallet
-
-        );
-
-
-
-
-
-
-
-    const offset =
-
-        get2DOffset(
-
-            pallet,
-
-            scale
-
-        );
-
-
-
-
-
-
-
-
-    ctx.save();
-
-
-
-
-
-
-
-    ctx.translate(
-
-
-
-        offset.x +
-
-        box.x *
-
-        scale,
-
-
-
-        offset.y +
-
-        box.y *
-
-        scale
-
-
-
-    );
-
-
+        getScale();
 
 
 
@@ -614,21 +445,11 @@ function drawBox2D(
 
     ctx.fillStyle =
 
-        getLayerColor(
-
-            box.layer
-
-        );
+        getColor(box.layer);
 
 
 
-
-
-
-
-    ctx.strokeStyle =
-
-        "#333";
+    ctx.strokeStyle="#333";
 
 
 
@@ -640,21 +461,23 @@ function drawBox2D(
 
 
 
-        0,
+        100 +
 
-        0,
-
-
-
-        box.length *
-
-        scale,
+        box.x*scale,
 
 
 
-        box.width *
+        80 +
 
-        scale
+        box.y*scale,
+
+
+
+        box.length*scale,
+
+
+
+        box.width*scale
 
 
 
@@ -670,48 +493,27 @@ function drawBox2D(
 
 
 
-        0,
+        100 +
 
-        0,
-
-
-
-        box.length *
-
-        scale,
+        box.x*scale,
 
 
 
-        box.width *
+        80 +
 
-        scale
+        box.y*scale,
+
+
+
+        box.length*scale,
+
+
+
+        box.width*scale
 
 
 
     );
-
-
-
-
-
-
-
-
-    drawArrow2D(
-
-        box,
-
-        scale
-
-    );
-
-
-
-
-
-
-
-    ctx.restore();
 
 
 
@@ -725,16 +527,7 @@ function drawBox2D(
 
 
 
-// ======================================
-// Maßstab
-// ======================================
-
-
-function get2DScale(
-
-    pallet
-
-){
+function getScale(){
 
 
 
@@ -742,23 +535,15 @@ function get2DScale(
 
 
 
-        canvas.width /
-
-        pallet.length,
+        500/currentPallet.length,
 
 
 
-        canvas.height /
-
-        pallet.width
+        500/currentPallet.width
 
 
 
-    )
-
-    *
-
-    0.75;
+    );
 
 
 
@@ -769,204 +554,6 @@ function get2DScale(
 
 
 
-
-
-
-function get2DOffset(
-
-    pallet,
-
-    scale
-
-){
-
-
-
-    return {
-
-
-
-        x:
-
-        (
-
-            canvas.width -
-
-            pallet.length *
-
-            scale
-
-        )
-
-        /2,
-
-
-
-        y:
-
-        (
-
-            canvas.height -
-
-            pallet.width *
-
-            scale
-
-        )
-
-        /2
-
-
-
-    };
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Pfeil 2D
-// ======================================
-
-
-function drawArrow2D(
-
-    box,
-
-    scale
-
-){
-
-
-
-    ctx.strokeStyle =
-
-        "red";
-
-
-
-    ctx.lineWidth = 2;
-
-
-
-
-
-
-
-    ctx.beginPath();
-
-
-
-
-
-
-
-    if(
-
-        box.length >= box.width
-
-    ){
-
-
-
-        ctx.moveTo(
-
-            10,
-
-            box.width *
-
-            scale /
-
-            2
-
-        );
-
-
-
-        ctx.lineTo(
-
-            box.length *
-
-            scale -
-
-            10,
-
-            box.width *
-
-            scale /
-
-            2
-
-        );
-
-
-
-    }
-
-    else{
-
-
-
-        ctx.moveTo(
-
-            box.length *
-
-            scale /
-
-            2,
-
-            10
-
-        );
-
-
-
-        ctx.lineTo(
-
-            box.length *
-
-            scale /
-
-            2,
-
-            box.width *
-
-            scale -
-
-            10
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-    ctx.stroke();
-
-
-
-}
-/*
-==================================================
- canvas.js
- Teil 3
- 3D Basis
-==================================================
-*/
 
 
 
@@ -975,85 +562,24 @@ function drawArrow2D(
 // ======================================
 
 
-function draw3DView(
-
-    variant,
-
-    pallet
-
-){
+function draw3D(){
 
 
 
-    drawPallet3D(
+    currentVariant.boxes
 
-        pallet
-
-    );
+    .sort((a,b)=>{
 
 
+        return a.z+b.y-b.z-a.y;
 
 
+    })
+
+    .forEach(box=>{
 
 
-
-    const boxes =
-
-        [...variant.boxes];
-
-
-
-
-
-
-
-    // hinten zuerst zeichnen
-
-
-    boxes.sort((a,b)=>{
-
-
-
-        return (
-
-            a.y +
-
-            a.z
-
-        )
-
-        -
-
-        (
-
-            b.y +
-
-            b.z
-
-        );
-
-
-
-    });
-
-
-
-
-
-
-
-    boxes.forEach(box=>{
-
-
-
-        drawBox3D(
-
-            box,
-
-            pallet
-
-        );
-
+        drawBox3D(box);
 
 
     });
@@ -1071,759 +597,85 @@ function draw3DView(
 
 
 // ======================================
-// 3D Projektion
-// ======================================
-
-
-function project3D(
-
-    x,
-
-    y,
-
-    z,
-
-    pallet
-
-){
-
-
-
-    const scale =
-
-
-
-        Math.min(
-
-
-
-            canvas.width /
-
-            (
-
-                pallet.length +
-
-                pallet.width
-
-            ),
-
-
-
-            canvas.height /
-
-            (
-
-                pallet.length +
-
-                pallet.width
-
-            )
-
-
-
-        )
-
-        *
-
-        0.8;
-
-
-
-
-
-
-
-    return {
-
-
-
-        x:
-
-
-
-            canvas.width/2
-
-            +
-
-            (
-
-                x -
-
-                y
-
-            )
-
-            *
-
-            scale,
-
-
-
-
-
-
-
-
-        y:
-
-
-
-            canvas.height *
-
-            0.65
-
-            +
-
-            (
-
-                x +
-
-                y
-
-            )
-
-            *
-
-            scale
-
-            *
-
-            0.45
-
-            -
-
-            z
-
-            *
-
-            scale
-
-            *
-
-            0.7
-
-
-
-    };
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Palette 3D
-// ======================================
-
-
-function drawPallet3D(
-
-    pallet
-
-){
-
-
-
-    const z = 0;
-
-
-
-
-
-
-
-    const p1 =
-
-        project3D(
-
-            0,
-
-            0,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-
-
-
-
-    const p2 =
-
-        project3D(
-
-            pallet.length,
-
-            0,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-
-
-
-
-    const p3 =
-
-        project3D(
-
-            pallet.length,
-
-            pallet.width,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-
-
-
-
-    const p4 =
-
-        project3D(
-
-            0,
-
-            pallet.width,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-
-
-
-
-    ctx.beginPath();
-
-
-
-    ctx.moveTo(
-
-        p1.x,
-
-        p1.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        p2.x,
-
-        p2.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        p3.x,
-
-        p3.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        p4.x,
-
-        p4.y
-
-    );
-
-
-
-    ctx.closePath();
-
-
-
-
-
-
-
-    ctx.fillStyle =
-
-        "#b88652";
-
-
-
-    ctx.fill();
-
-
-
-
-
-
-
-    ctx.strokeStyle =
-
-        "#5d4037";
-
-
-
-    ctx.stroke();
-
-
-
-}
-/*
-==================================================
- canvas.js
- Teil 4
- 3D Karton Darstellung
-==================================================
-*/
-
-
-
-// ======================================
-// Karton 3D zeichnen
+// 3D Karton
 // ======================================
 
 
 function drawBox3D(
 
-    box,
-
-    pallet
+    box
 
 ){
 
 
 
-    let length =
+    const s=0.45;
 
-        box.length;
 
 
+    const x =
 
-    let width =
+        canvas.width/2
 
-        box.width;
+        +
 
+        (box.x-box.y)*s;
 
 
 
+    const y =
 
+        350
 
+        +
 
-    // Drehung berücksichtigen
+        (box.x+box.y)*0.25*s
 
+        -
 
-    if(
+        box.z*0.5*s;
 
-        box.rotation === 90
 
-    ){
 
 
-
-        length =
-
-            box.width;
-
-
-
-        width =
-
-            box.length;
-
-
-
-    }
-
-
-
-
-
-
-
-    const z =
-
-        box.z || 0;
-
-
-
-
-
-
-
-    const h =
-
-        box.height || 0;
-
-
-
-
-
-
-
-    // Untere Ebene
-
-
-    const p1 = project3D(
-
-        box.x,
-
-        box.y,
-
-        z,
-
-        pallet
-
-    );
-
-
-
-    const p2 = project3D(
-
-        box.x + length,
-
-        box.y,
-
-        z,
-
-        pallet
-
-    );
-
-
-
-    const p3 = project3D(
-
-        box.x + length,
-
-        box.y + width,
-
-        z,
-
-        pallet
-
-    );
-
-
-
-    const p4 = project3D(
-
-        box.x,
-
-        box.y + width,
-
-        z,
-
-        pallet
-
-    );
-
-
-
-
-
-
-
-    // Obere Ebene
-
-
-    const t1 = project3D(
-
-        box.x,
-
-        box.y,
-
-        z+h,
-
-        pallet
-
-    );
-
-
-
-    const t2 = project3D(
-
-        box.x + length,
-
-        box.y,
-
-        z+h,
-
-        pallet
-
-    );
-
-
-
-    const t3 = project3D(
-
-        box.x + length,
-
-        box.y + width,
-
-        z+h,
-
-        pallet
-
-    );
-
-
-
-    const t4 = project3D(
-
-        box.x,
-
-        box.y + width,
-
-        z+h,
-
-        pallet
-
-    );
-
-
-
-
-
-
-
-    ctx.save();
-
-
-
-
-
-
-
-    // Oberseite
-
-
-    drawPolygon3D(
-
-        [
-
-            t1,
-
-            t2,
-
-            t3,
-
-            t4
-
-        ],
-
-        "#d9b77a"
-
-    );
-
-
-
-
-
-
-
-
-    // Vorderseite
-
-
-    drawPolygon3D(
-
-        [
-
-            p4,
-
-            p3,
-
-            t3,
-
-            t4
-
-        ],
-
-        "#b9874f"
-
-    );
-
-
-
-
-
-
-
-
-    // rechte Seite
-
-
-    drawPolygon3D(
-
-        [
-
-            p2,
-
-            p3,
-
-            t3,
-
-            t2
-
-        ],
-
-        "#986738"
-
-    );
-
-
-
-
-
-
-
-
-    ctx.restore();
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Polygon zeichnen
-// ======================================
-
-
-function drawPolygon3D(
-
-    points,
-
-    color
-
-){
-
-
-
-    ctx.beginPath();
-
-
-
-    ctx.moveTo(
-
-        points[0].x,
-
-        points[0].y
-
-    );
-
-
-
-
-
-
-
-    for(
-
-        let i=1;
-
-        i<points.length;
-
-        i++
-
-    ){
-
-
-
-        ctx.lineTo(
-
-            points[i].x,
-
-            points[i].y
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-    ctx.closePath();
 
 
 
     ctx.fillStyle =
 
-        color;
+        getColor(box.layer);
 
 
 
-    ctx.fill();
+    ctx.fillRect(
 
 
 
-    ctx.strokeStyle =
+        x,
 
-        "#4a3728";
+        y,
+
+        box.length*s,
+
+        box.width*s/2
 
 
 
-    ctx.stroke();
+    );
 
 
 
 }
-/*
-==================================================
- canvas.js
- Teil 5
- Abschluss
-==================================================
-*/
 
 
 
-// ======================================
-// Farbe je Lage
-// ======================================
 
 
-function getLayerColor(
+
+
+
+
+function getColor(
 
     layer
 
@@ -1831,291 +683,17 @@ function getLayerColor(
 
 
 
-    const colors = [
-
-
+    const c=[
 
         "#c89b5b",
 
-        "#d7b477",
-
-        "#b88950",
-
-        "#e0c28c"
-
-
+        "#e0bb7a"
 
     ];
 
 
 
-
-
-
-
-    return colors[
-
-        (
-
-            layer - 1
-
-        )
-
-        %
-
-        colors.length
-
-    ];
-
+    return c[(layer-1)%2];
 
 
 }
-
-
-
-
-
-
-
-
-
-// ======================================
-// 3D Richtungspfeil
-// ======================================
-
-
-function drawArrow3D(
-
-    box,
-
-    pallet
-
-){
-
-
-
-    let start;
-
-    let end;
-
-
-
-
-
-
-
-    const z =
-
-        box.z +
-
-        box.height +
-
-        2;
-
-
-
-
-
-
-
-
-    if(
-
-        box.length >= box.width
-
-    ){
-
-
-
-        start = project3D(
-
-            box.x + 20,
-
-            box.y + box.width/2,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-
-
-        end = project3D(
-
-            box.x + box.length - 20,
-
-            box.y + box.width/2,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-    }
-
-    else{
-
-
-
-        start = project3D(
-
-            box.x + box.length/2,
-
-            box.y + 20,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-
-
-        end = project3D(
-
-            box.x + box.length/2,
-
-            box.y + box.width - 20,
-
-            z,
-
-            pallet
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-    ctx.strokeStyle =
-
-        "red";
-
-
-
-    ctx.lineWidth = 3;
-
-
-
-
-
-
-
-    ctx.beginPath();
-
-
-
-    ctx.moveTo(
-
-        start.x,
-
-        start.y
-
-    );
-
-
-
-    ctx.lineTo(
-
-        end.x,
-
-        end.y
-
-    );
-
-
-
-    ctx.stroke();
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Tastatur Steuerung optional
-// ======================================
-
-
-document.addEventListener(
-
-    "keydown",
-
-    function(e){
-
-
-
-        if(e.key==="1"){
-
-
-
-            setCanvasMode(
-
-                "top"
-
-            );
-
-
-
-        }
-
-
-
-
-
-
-
-        if(e.key==="2"){
-
-
-
-            setCanvasMode(
-
-                "3d"
-
-            );
-
-
-
-        }
-
-
-
-    }
-
-);
-
-
-
-
-
-
-
-
-
-console.log(
-
-    "Canvas Version 40.0 geladen"
-
-);
