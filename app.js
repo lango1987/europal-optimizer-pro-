@@ -1,14 +1,18 @@
 /*
-=========================================
+==================================================
  Europal Optimizer Pro
  App
- Version 1.0
-=========================================
+ Version 0.1.0
+==================================================
 */
 
 document.addEventListener("DOMContentLoaded", initApp);
 
 function initApp() {
+
+    document
+        .getElementById("maxHeight")
+        .value = SETTINGS.defaultMaxHeight;
 
     document
         .getElementById("calculate")
@@ -18,54 +22,76 @@ function initApp() {
 
 function calculate() {
 
-    const box = getBoxInput();
-    const maxHeight = getMaxHeight();
+    const palletKey = document.getElementById("pallet").value;
 
-    // Einfache Prüfung
-    if (box.length <= 0 || box.width <= 0 || box.height <= 0) {
-        showMessage("Bitte gültige Kartonmaße eingeben.");
-        return;
-    }
+    const job = {
 
-    // Aktuell immer Europalette
-    const pallet = PALLETS.euro;
+        pallet: PALLETS[palletKey],
 
-    // Varianten berechnen
-    const variants = optimize(box, pallet);
+        box: {
 
-    if (variants.length === 0) {
-        showMessage("Keine Variante gefunden.");
-        return;
-    }
+            length: Number(document.getElementById("length").value),
 
-    // Beste Variante auswählen
-    const best = variants[0];
+            width: Number(document.getElementById("width").value),
 
-    // Weitere Berechnungen
-    const layers = calculateLayers(
-        maxHeight,
-        box.height,
-        pallet.height
-    );
+            height: Number(document.getElementById("height").value),
 
-    const total = calculateTotal(
-        best.cartonsPerLayer,
-        layers
-    );
+            weight: Number(document.getElementById("weight").value)
 
-    const result = {
-        cartonsPerLayer: best.cartonsPerLayer,
-        layers: layers,
-        total: total,
-        utilization: best.utilization
+        },
+
+        settings: {
+
+            maxHeight: Number(document.getElementById("maxHeight").value)
+
+        }
+
     };
 
-    // Dashboard aktualisieren
-    updateDashboard(result);
+    // Eingaben prüfen
+    if (
+        job.box.length <= 0 ||
+        job.box.width <= 0 ||
+        job.box.height <= 0
+    ) {
 
-    // Palette zeichnen
-    drawVariant("canvas", best, pallet);
+        alert("Bitte gültige Kartonmaße eingeben.");
+        return;
 
-    console.log("Beste Variante:", best);
+    }
+
+    // Optimierung starten
+    const variants = optimize(job);
+
+    if (variants.length === 0) {
+
+        alert("Keine Variante gefunden.");
+        return;
+
+    }
+
+    const best = variants[0];
+
+    // Dashboard
+    document.getElementById("layer").textContent =
+        best.cartonsPerLayer;
+
+    document.getElementById("layers").textContent =
+        best.layers;
+
+    document.getElementById("total").textContent =
+        best.totalCartons;
+
+    document.getElementById("utilization").textContent =
+        best.utilization + " %";
+
+    // Zeichnen
+    drawVariant(
+        "canvas",
+        best,
+        job.pallet
+    );
+
+    console.log(best);
 
 }
