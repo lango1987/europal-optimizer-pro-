@@ -3,210 +3,267 @@
    Version 1.0
 ====================================================== */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+:root{
 
-body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: #eef2f7;
-    color: #333;
-}
+    --primary:#2563EB;
+    --primary-hover:#1D4ED8;
 
-/* Header */
+    --background:#F3F6FB;
 
-header {
-    height: 70px;
-    background: #1565c0;
-    color: white;
+    --card:#FFFFFF;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    --border:#E5E7EB;
 
-    padding: 0 30px;
+    --text:#1F2937;
 
-    box-shadow: 0 3px 10px rgba(0,0,0,.15);
-}
+    --text-light:#6B7280;
 
-header h1 {
-    font-size: 28px;
-}
+    --success:#22C55E;
 
-.version {
-    font-size: 14px;
-    opacity: .9;
-}
+    --warning:#F59E0B;
 
-/* Layout */
-
-main {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 20px;
-    padding: 20px;
-}
-
-/* Sidebar */
-
-.sidebar {
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,.08);
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
-}
-
-.sidebar label {
-    display: block;
-    margin-top: 16px;
-    margin-bottom: 6px;
-    font-weight: 600;
-}
-
-.sidebar input,
-.sidebar select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 15px;
-}
-
-.sidebar button {
-    width: 100%;
-    margin-top: 25px;
-    padding: 14px;
-
-    border: none;
-    border-radius: 8px;
-
-    background: #1565c0;
-    color: white;
-
-    font-size: 16px;
-    cursor: pointer;
-
-    transition: .2s;
-}
-
-.sidebar button:hover {
-    background: #0d47a1;
-}
-
-/* Rechte Seite */
-
-.content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* Dashboard */
-
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-}
-
-.card {
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 5px 20px rgba(0,0,0,.08);
-}
-
-.card h3 {
-    font-size: 15px;
-    color: #666;
-}
-
-.card p {
-    margin-top: 12px;
-    font-size: 34px;
-    font-weight: bold;
-    color: #1565c0;
-}
-
-/* Canvas */
-
-.canvas-box {
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,.08);
-}
-
-canvas {
-    width: 100%;
-    height: auto;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: white;
-}
-
-/* Varianten */
-
-.variants {
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,.08);
-}
-
-#variantList {
-    margin-top: 15px;
-    display: grid;
-    gap: 10px;
-}
-
-.variantButton {
-    padding: 14px;
-    border: none;
-    border-radius: 8px;
-    background: #f5f5f5;
-    text-align: left;
-    cursor: pointer;
-    transition: .2s;
-}
-
-.variantButton:hover {
-    background: #e3f2fd;
-}
-
-/* Responsive */
-
-@media (max-width: 1000px) {
-
-    main {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    --danger:#EF4444;
 
 }
 
-@media (max-width: 600px) {
+body{
 
-    .dashboard {
-        grid-template-columns: 1fr;
-    }
+    font-family:'Inter',sans-serif;
 
-    header {
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-        height: auto;
-        padding: 15px;
+    background:var(--background);
+
+    color:var(--text);
+
+}
+
+/* ===========================
+   Navbar
+=========================== */
+
+.navbar{
+
+    height:72px;
+
+}
+
+.navbar-brand{
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+
+}
+
+.navbar .btn{
+
+    border-radius:12px;
+
+}
+
+/* ===========================
+   Cards
+=========================== */
+
+.card{
+
+    border:none !important;
+
+    border-radius:18px !important;
+
+    transition:.25s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 18px 40px rgba(0,0,0,.08) !important;
+
+}
+
+/* ===========================
+   Sidebar
+=========================== */
+
+.form-control,
+.form-select{
+
+    border-radius:12px;
+
+    border:1px solid var(--border);
+
+    height:48px;
+
+}
+
+.form-control:focus,
+.form-select:focus{
+
+    box-shadow:none;
+
+    border-color:var(--primary);
+
+}
+
+/* ===========================
+   Button
+=========================== */
+
+.btn-primary{
+
+    background:var(--primary);
+
+    border:none;
+
+    border-radius:14px;
+
+    height:52px;
+
+    font-weight:600;
+
+}
+
+.btn-primary:hover{
+
+    background:var(--primary-hover);
+
+}
+
+/* ===========================
+   Canvas
+=========================== */
+
+canvas{
+
+    width:100%;
+
+    background:white;
+
+    border:2px dashed #D6DBE4;
+
+    border-radius:14px;
+
+}
+
+/* ===========================
+   KPI
+=========================== */
+
+h2{
+
+    font-weight:700;
+
+}
+
+.card h6{
+
+    color:var(--text-light);
+
+    text-transform:uppercase;
+
+    font-size:13px;
+
+    letter-spacing:.5px;
+
+}
+
+.card h2{
+
+    color:var(--primary);
+
+    font-size:38px;
+
+}
+
+/* ===========================
+   Varianten
+=========================== */
+
+.variant-card{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px;
+
+    margin-bottom:15px;
+
+    background:white;
+
+    border-radius:14px;
+
+    border:1px solid var(--border);
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.variant-card:hover{
+
+    border-color:var(--primary);
+
+    transform:translateX(4px);
+
+}
+
+.variant-title{
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.variant-info{
+
+    color:var(--text-light);
+
+    font-size:14px;
+
+}
+
+/* ===========================
+   Scrollbar
+=========================== */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#CBD5E1;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#94A3B8;
+
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media(max-width:992px){
+
+    .navbar{
+
+        height:auto;
+
+        padding:10px;
+
     }
 
 }
