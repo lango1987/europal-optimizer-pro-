@@ -2,11 +2,18 @@
 ==================================================
  Europal Optimizer Pro
  App
- Version 0.1.0
+ Version 0.2.0
 ==================================================
 */
 
 document.addEventListener("DOMContentLoaded", initApp);
+
+// Aktuelle Ansicht
+let currentView = "top";
+
+// Aktuelle Daten merken
+let currentJob = null;
+let currentVariant = null;
 
 function initApp() {
 
@@ -17,6 +24,9 @@ function initApp() {
     document
         .getElementById("calculate")
         .addEventListener("click", calculate);
+
+    // Ansichten umschalten
+    addViewEvents();
 
 }
 
@@ -48,11 +58,12 @@ function calculate() {
 
     };
 
-    // Eingaben prüfen
     if (
+
         job.box.length <= 0 ||
         job.box.width <= 0 ||
         job.box.height <= 0
+
     ) {
 
         alert("Bitte gültige Kartonmaße eingeben.");
@@ -60,7 +71,6 @@ function calculate() {
 
     }
 
-    // Optimierung starten
     const variants = optimize(job);
 
     if (variants.length === 0) {
@@ -72,7 +82,17 @@ function calculate() {
 
     const best = variants[0];
 
-    // Dashboard
+    currentJob = job;
+    currentVariant = best;
+
+    updateDashboard(best);
+
+    drawCurrentView();
+
+}
+
+function updateDashboard(best){
+
     document.getElementById("layer").textContent =
         best.cartonsPerLayer;
 
@@ -85,13 +105,123 @@ function calculate() {
     document.getElementById("utilization").textContent =
         best.utilization + " %";
 
-    // Zeichnen
-    drawVariant(
-        "canvas",
-        best,
-        job.pallet
-    );
+}
 
-    console.log(best);
+function drawCurrentView(){
+
+    if(!currentVariant) return;
+
+    switch(currentView){
+
+        case "top":
+
+            drawVariant(
+                "canvas",
+                currentVariant,
+                currentJob.pallet
+            );
+
+            break;
+
+        case "layer1":
+
+            drawVariant(
+                "canvas",
+                currentVariant,
+                currentJob.pallet
+            );
+
+            break;
+
+        case "layer2":
+
+            drawVariant(
+                "canvas",
+                currentVariant,
+                currentJob.pallet
+            );
+
+            break;
+
+        case "iso":
+
+            if(typeof drawIsometric === "function"){
+
+                drawIsometric(
+                    "canvas",
+                    currentVariant,
+                    currentJob.pallet
+                );
+
+            }else{
+
+                drawVariant(
+                    "canvas",
+                    currentVariant,
+                    currentJob.pallet
+                );
+
+            }
+
+            break;
+
+    }
+
+}
+
+function addViewEvents(){
+
+    const top = document.getElementById("viewTop");
+    const iso = document.getElementById("viewIso");
+    const layer1 = document.getElementById("viewLayer1");
+    const layer2 = document.getElementById("viewLayer2");
+
+    if(top){
+
+        top.onclick = ()=>{
+
+            currentView="top";
+
+            drawCurrentView();
+
+        };
+
+    }
+
+    if(iso){
+
+        iso.onclick = ()=>{
+
+            currentView="iso";
+
+            drawCurrentView();
+
+        };
+
+    }
+
+    if(layer1){
+
+        layer1.onclick = ()=>{
+
+            currentView="layer1";
+
+            drawCurrentView();
+
+        };
+
+    }
+
+    if(layer2){
+
+        layer2.onclick = ()=>{
+
+            currentView="layer2";
+
+            drawCurrentView();
+
+        };
+
+    }
 
 }
