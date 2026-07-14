@@ -2,8 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  Canvas
- Version 2.0
- Rotation Unterstützung
+ Version 6.0
+ 90 Grad Wechsellagen
 ==================================================
 */
 
@@ -14,8 +14,10 @@ function drawVariant(
     pallet
 ){
 
+
     const canvas =
         document.getElementById(canvasId);
+
 
 
     if(!canvas){
@@ -25,16 +27,24 @@ function drawVariant(
     }
 
 
+
+
     const ctx =
         canvas.getContext("2d");
 
 
 
+
     ctx.clearRect(
+
         0,
+
         0,
+
         canvas.width,
+
         canvas.height
+
     );
 
 
@@ -43,19 +53,29 @@ function drawVariant(
 
 
 
+
+
     if(currentView === "iso"){
 
 
         drawIsometric(
+
             ctx,
+
             variant,
+
             pallet
+
         );
 
 
         return;
 
     }
+
+
+
+
 
 
 
@@ -63,16 +83,25 @@ function drawVariant(
 
 
         drawTopView(
+
             ctx,
+
             variant,
+
             pallet,
+
             1
+
         );
 
 
         return;
 
     }
+
+
+
+
 
 
 
@@ -80,10 +109,15 @@ function drawVariant(
 
 
         drawTopView(
+
             ctx,
+
             variant,
+
             pallet,
+
             2
+
         );
 
 
@@ -93,11 +127,20 @@ function drawVariant(
 
 
 
+
+
+
+
     drawTopView(
+
         ctx,
+
         variant,
+
         pallet,
+
         0
+
     );
 
 }
@@ -107,17 +150,25 @@ function drawVariant(
 
 
 
-// =======================================
+
+
+// ======================================
 // Draufsicht
-// =======================================
+// ======================================
 
 
 function drawTopView(
+
     ctx,
+
     variant,
+
     pallet,
+
     layer
+
 ){
+
 
 
     const margin =
@@ -168,17 +219,26 @@ function drawTopView(
 
 
 
+
+
     variant.boxes.forEach(box=>{
 
 
+
         if(
+
             layer !== 0 &&
+
             box.layer !== layer
+
         ){
 
             return;
 
         }
+
+
+
 
 
 
@@ -199,6 +259,7 @@ function drawTopView(
         );
 
 
+
     });
 
 
@@ -210,17 +271,24 @@ function drawTopView(
 
 
 
-// =======================================
-// Palette oben
-// =======================================
+
+// ======================================
+// Palette Draufsicht
+// ======================================
 
 
 function drawTopPallet(
+
     ctx,
+
     x,
+
     y,
+
     w,
+
     h
+
 ){
 
 
@@ -228,12 +296,19 @@ function drawTopPallet(
         COLORS.palletTop;
 
 
+
     ctx.fillRect(
+
         x,
+
         y,
+
         w,
+
         h
+
     );
+
 
 
 
@@ -241,72 +316,58 @@ function drawTopPallet(
         COLORS.palletDark;
 
 
+
     ctx.lineWidth = 3;
 
 
+
     ctx.strokeRect(
+
         x,
+
         y,
+
         w,
+
         h
+
     );
 
+
 }
+/*
+==================================================
+ Europal Optimizer Pro
+ Canvas
+ Teil 2
+ Karton Draufsicht
+==================================================
+*/
 
 
-
-
-
-
-// =======================================
-// Karton oben mit 180° Drehung
-// =======================================
+// ======================================
+// Karton oben zeichnen
+// ======================================
 
 
 function drawTopBox(
+
     ctx,
+
     x,
+
     y,
+
     w,
+
     h,
+
     rotation
+
 ){
 
 
     ctx.save();
-
-
-
-    if(rotation === 180){
-
-
-        ctx.translate(
-            x + w/2,
-            y + h/2
-        );
-
-
-        ctx.rotate(
-            Math.PI
-        );
-
-
-        x = -w/2;
-
-        y = -h/2;
-
-
-    }
-    else{
-
-
-        x = x;
-
-        y = y;
-
-
-    }
-
 
 
 
@@ -321,6 +382,10 @@ function drawTopBox(
 
 
 
+    ctx.lineWidth = 1;
+
+
+
     ctx.fillRect(
 
         x,
@@ -350,13 +415,19 @@ function drawTopBox(
 
 
 
-    // Richtung
+
+
+
+    // ==================================
+    // Ausrichtung anzeigen
+    // ==================================
+
 
     ctx.strokeStyle =
         "#1976D2";
 
 
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
 
 
 
@@ -364,23 +435,152 @@ function drawTopBox(
 
 
 
-    ctx.moveTo(
-
-        x + 10,
-
-        y + h/2
-
-    );
 
 
 
-    ctx.lineTo(
+    // 90 Grad gedreht
 
-        x + w - 10,
+    if(rotation === 90){
 
-        y + h/2
 
-    );
+
+        ctx.moveTo(
+
+            x + w/2,
+
+            y + h - 15
+
+        );
+
+
+
+        ctx.lineTo(
+
+            x + w/2,
+
+            y + 15
+
+        );
+
+
+
+
+
+        // Spitze
+
+        ctx.moveTo(
+
+            x+w/2,
+
+            y+15
+
+        );
+
+
+        ctx.lineTo(
+
+            x+w/2-6,
+
+            y+28
+
+        );
+
+
+
+        ctx.moveTo(
+
+            x+w/2,
+
+            y+15
+
+        );
+
+
+        ctx.lineTo(
+
+            x+w/2+6,
+
+            y+28
+
+        );
+
+
+
+    }
+
+
+
+
+
+    // normale Lage
+
+    else{
+
+
+
+        ctx.moveTo(
+
+            x+15,
+
+            y+h/2
+
+        );
+
+
+
+        ctx.lineTo(
+
+            x+w-15,
+
+            y+h/2
+
+        );
+
+
+
+
+
+        // Spitze
+
+        ctx.moveTo(
+
+            x+w-15,
+
+            y+h/2
+
+        );
+
+
+        ctx.lineTo(
+
+            x+w-28,
+
+            y+h/2-6
+
+        );
+
+
+
+        ctx.moveTo(
+
+            x+w-15,
+
+            y+h/2
+
+        );
+
+
+        ctx.lineTo(
+
+            x+w-28,
+
+            y+h/2+6
+
+        );
+
+
+
+    }
 
 
 
@@ -391,20 +591,22 @@ function drawTopBox(
     ctx.restore();
 
 
+
 }
 /*
 ==================================================
  Europal Optimizer Pro
  Canvas
- Teil 2
+ Teil 3
  Isometrische Ansicht
 ==================================================
 */
 
 
-// =======================================
-// Isometrische Darstellung
-// =======================================
+
+// ======================================
+// Isometrische Ansicht
+// ======================================
 
 
 function drawIsometric(
@@ -436,6 +638,7 @@ function drawIsometric(
 
 
 
+
     // Palette zuerst
 
     drawIsoPallet(
@@ -457,7 +660,6 @@ function drawIsometric(
 
 
 
-
     // Kartons sortieren
 
     const boxes =
@@ -468,27 +670,27 @@ function drawIsometric(
     boxes.sort((a,b)=>{
 
 
-        const depthA =
+        return (
 
             a.x +
             a.y +
-            a.z;
+            a.z
 
+        )
 
+        -
 
-        const depthB =
+        (
 
             b.x +
             b.y +
-            b.z;
+            b.z
 
-
-
-        return depthA-depthB;
-
+        );
 
 
     });
+
 
 
 
@@ -500,7 +702,7 @@ function drawIsometric(
 
 
 
-        const point =
+        const pos =
             isoConvert(
 
                 box.x,
@@ -515,13 +717,14 @@ function drawIsometric(
 
 
 
+
         drawIsoBox(
 
             ctx,
 
-            point.x,
+            pos.x,
 
-            point.y,
+            pos.y,
 
             box.length * scale,
 
@@ -546,9 +749,11 @@ function drawIsometric(
 
 
 
-// =======================================
-// Weltkoordinaten -> Isometrie
-// =======================================
+
+
+// ======================================
+// Koordinaten umwandeln
+// ======================================
 
 
 function isoConvert(
@@ -562,8 +767,10 @@ function isoConvert(
 ){
 
 
+
     const scale =
         SETTINGS.iso.scale;
+
 
 
 
@@ -580,9 +787,12 @@ function isoConvert(
         (
             x -
             y
+
         )
         *
         scale,
+
+
 
 
 
@@ -595,11 +805,14 @@ function isoConvert(
         (
             x +
             y
+
         )
         *
         scale
         *
         0.5
+
+
 
         -
 
@@ -616,15 +829,15 @@ function isoConvert(
 ==================================================
  Europal Optimizer Pro
  Canvas
- Teil 3
- 3D Karton
+ Teil 4
+ 3D Karton + Palette
 ==================================================
 */
 
 
-// =======================================
-// 3D Karton zeichnen
-// =======================================
+// ======================================
+// 3D Karton
+// ======================================
 
 
 function drawIsoBox(
@@ -646,15 +859,14 @@ function drawIsoBox(
 ){
 
 
+
     const height =
         h * 0.8;
 
 
 
-    // ==========================
-    // Schatten
-    // ==========================
 
+    // Schatten
 
     ctx.fillStyle =
         COLORS.shadow;
@@ -668,7 +880,7 @@ function drawIsoBox(
 
         x-w,
 
-        y+w/2+height+8
+        y+w/2+height
 
     );
 
@@ -677,7 +889,7 @@ function drawIsoBox(
 
         x+l-w,
 
-        y+l/2+w/2+height+8
+        y+l/2+w/2+height
 
     );
 
@@ -686,7 +898,7 @@ function drawIsoBox(
 
         x+l,
 
-        y+l/2+height+8
+        y+l/2+height
 
     );
 
@@ -695,12 +907,13 @@ function drawIsoBox(
 
         x,
 
-        y+height+8
+        y+height
 
     );
 
 
     ctx.closePath();
+
 
 
     ctx.fill();
@@ -711,13 +924,11 @@ function drawIsoBox(
 
 
 
-    // ==========================
     // Oberseite
-    // ==========================
-
 
     ctx.fillStyle =
         COLORS.boxTop;
+
 
 
     ctx.strokeStyle =
@@ -738,6 +949,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x+l,
@@ -745,6 +957,7 @@ function drawIsoBox(
         y+l/2
 
     );
+
 
 
     ctx.lineTo(
@@ -756,6 +969,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x-w,
@@ -763,6 +977,7 @@ function drawIsoBox(
         y+w/2
 
     );
+
 
 
     ctx.closePath();
@@ -779,10 +994,8 @@ function drawIsoBox(
 
 
 
-    // ==========================
-    // Vorderseite
-    // ==========================
 
+    // Vorderseite
 
     ctx.fillStyle =
         COLORS.boxFront;
@@ -802,6 +1015,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x+l-w,
@@ -809,6 +1023,7 @@ function drawIsoBox(
         y+l/2+w/2
 
     );
+
 
 
     ctx.lineTo(
@@ -820,6 +1035,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x-w,
@@ -827,6 +1043,7 @@ function drawIsoBox(
         y+w/2+height
 
     );
+
 
 
     ctx.closePath();
@@ -843,10 +1060,7 @@ function drawIsoBox(
 
 
 
-    // ==========================
-    // Rechte Seite
-    // ==========================
-
+    // Seite
 
     ctx.fillStyle =
         COLORS.boxSide;
@@ -866,6 +1080,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x+l,
@@ -875,6 +1090,7 @@ function drawIsoBox(
     );
 
 
+
     ctx.lineTo(
 
         x+l-w,
@@ -882,6 +1098,7 @@ function drawIsoBox(
         y+l/2+w/2+height
 
     );
+
 
 
     ctx.lineTo(
@@ -908,10 +1125,8 @@ function drawIsoBox(
 
 
 
-    // ==========================
-    // Richtung auf Karton
-    // ==========================
 
+    // Richtung anzeigen
 
     ctx.strokeStyle =
         "#1976D2";
@@ -926,13 +1141,13 @@ function drawIsoBox(
 
 
 
-    if(rotation === 180){
 
+    if(rotation === 90){
 
 
         ctx.moveTo(
 
-            x+l-20,
+            x+l/2,
 
             y+10
 
@@ -941,21 +1156,21 @@ function drawIsoBox(
 
         ctx.lineTo(
 
-            x+20,
+            x+l/2,
 
             y+w/2
 
         );
 
 
-
     }
+
     else{
 
 
         ctx.moveTo(
 
-            x+20,
+            x+15,
 
             y+w/2
 
@@ -964,12 +1179,11 @@ function drawIsoBox(
 
         ctx.lineTo(
 
-            x+l-20,
+            x+l-15,
 
             y+10
 
         );
-
 
 
     }
@@ -980,21 +1194,19 @@ function drawIsoBox(
 
 
 
-
 }
-/*
-==================================================
- Europal Optimizer Pro
- Canvas
- Teil 4
- Palette + Hintergrund
-==================================================
-*/
 
 
-// =======================================
-// 3D Europalette
-// =======================================
+
+
+
+
+
+
+
+// ======================================
+// 3D Palette
+// ======================================
 
 
 function drawIsoPallet(
@@ -1012,68 +1224,11 @@ function drawIsoPallet(
 ){
 
 
-    const height = 20;
+
+    const h = 20;
 
 
 
-    // Schatten
-
-    ctx.fillStyle =
-        "rgba(0,0,0,0.15)";
-
-
-
-    ctx.beginPath();
-
-
-    ctx.moveTo(
-
-        x-w,
-
-        y+w/2+height+10
-
-    );
-
-
-    ctx.lineTo(
-
-        x+l-w,
-
-        y+l/2+w/2+height+10
-
-    );
-
-
-    ctx.lineTo(
-
-        x+l,
-
-        y+l/2+height+10
-
-    );
-
-
-    ctx.lineTo(
-
-        x,
-
-        y+10
-
-    );
-
-
-    ctx.closePath();
-
-
-    ctx.fill();
-
-
-
-
-
-
-
-    // Oberseite
 
     ctx.fillStyle =
         COLORS.palletTop;
@@ -1087,6 +1242,10 @@ function drawIsoPallet(
 
     ctx.lineWidth = 2;
 
+
+
+
+    // Oberfläche
 
 
     ctx.beginPath();
@@ -1147,7 +1306,9 @@ function drawIsoPallet(
 
 
 
+
     // Vorderseite
+
 
     ctx.fillStyle =
         COLORS.palletSide;
@@ -1182,7 +1343,7 @@ function drawIsoPallet(
 
         x+l-w,
 
-        y+l/2+w/2+height
+        y+l/2+w/2+h
 
     );
 
@@ -1192,7 +1353,7 @@ function drawIsoPallet(
 
         x-w,
 
-        y+w/2+height
+        y+w/2+h
 
     );
 
@@ -1212,7 +1373,9 @@ function drawIsoPallet(
 
 
 
+
     // Rechte Seite
+
 
     ctx.fillStyle =
         COLORS.palletDark;
@@ -1237,7 +1400,7 @@ function drawIsoPallet(
 
         x+l,
 
-        y+l/2+height
+        y+l/2+h
 
     );
 
@@ -1247,7 +1410,7 @@ function drawIsoPallet(
 
         x+l-w,
 
-        y+l/2+w/2+height
+        y+l/2+w/2+h
 
     );
 
@@ -1273,26 +1436,6 @@ function drawIsoPallet(
 
 
 
-
-
-    // Bretter
-
-    drawPalletLines(
-
-        ctx,
-
-        x,
-
-        y,
-
-        l,
-
-        w
-
-    );
-
-
-
 }
 
 
@@ -1301,93 +1444,13 @@ function drawIsoPallet(
 
 
 
-// =======================================
-// Paletten Bretter
-// =======================================
 
-
-function drawPalletLines(
-
-    ctx,
-
-    x,
-
-    y,
-
-    l,
-
-    w
-
-){
-
-
-
-    ctx.strokeStyle =
-        "#9C6B38";
-
-
-    ctx.lineWidth = 2;
-
-
-
-    for(
-        let i=1;
-        i<5;
-        i++
-    ){
-
-
-        let offset =
-            i*(w/5);
-
-
-
-        ctx.beginPath();
-
-
-
-        ctx.moveTo(
-
-            x-offset,
-
-            y+offset/2
-
-        );
-
-
-
-        ctx.lineTo(
-
-            x+l-offset,
-
-            y+l/2+offset/2
-
-        );
-
-
-
-        ctx.stroke();
-
-
-
-    }
-
-
-}
-
-
-
-
-
-
-
-// =======================================
+// ======================================
 // Hintergrund
-// =======================================
+// ======================================
 
 
 function drawBackground(ctx){
-
 
 
     ctx.fillStyle =
@@ -1408,11 +1471,10 @@ function drawBackground(ctx){
     );
 
 
-
 }
 
 
 
 console.log(
-    "Europal Canvas Version 2.0 geladen"
+    "Canvas Version 6.0 geladen"
 );
