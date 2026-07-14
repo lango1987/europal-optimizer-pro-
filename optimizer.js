@@ -2,13 +2,14 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 2.1
- Kreuzverband / versetzte Lagen
+ Version 2.2
+ Wechselnde 180° Lagen
 ==================================================
 */
 
 
 function optimize(job) {
+
 
     const variants = [];
 
@@ -61,15 +62,15 @@ function optimize(job) {
 
     return variants;
 
-
 }
 
 
 
 
-// =======================================
+
+// ==========================================
 // Muster berechnen
-// =======================================
+// ==========================================
 
 
 function calculatePattern(job, pattern){
@@ -81,6 +82,8 @@ function calculatePattern(job, pattern){
 
 
 
+    // 90 Grad Drehung
+
     if(pattern.rotation === 90){
 
 
@@ -90,6 +93,7 @@ function calculatePattern(job, pattern){
 
 
     }
+
 
 
 
@@ -112,7 +116,9 @@ function calculatePattern(job, pattern){
 
 
     const cartonsPerLayer =
+
         cols * rows;
+
 
 
 
@@ -125,6 +131,7 @@ function calculatePattern(job, pattern){
             (
                 job.settings.maxHeight -
                 job.pallet.height
+
             )
             /
             job.box.height
@@ -135,10 +142,13 @@ function calculatePattern(job, pattern){
 
 
 
+
     const totalCartons =
 
         cartonsPerLayer *
         layers;
+
+
 
 
 
@@ -172,23 +182,26 @@ function calculatePattern(job, pattern){
 
 
 
+
     return {
 
 
-        id: pattern.id,
+        id:
+            pattern.id,
 
 
-        name: pattern.name,
+        name:
+            pattern.name,
 
 
-        stability: pattern.stability,
+        stability:
+            pattern.stability,
+
 
 
         cols,
 
-
         rows,
-
 
         layers,
 
@@ -200,6 +213,7 @@ function calculatePattern(job, pattern){
 
 
         utilization,
+
 
 
         boxLength,
@@ -233,7 +247,6 @@ function calculatePattern(job, pattern){
 
             )
 
-
     };
 
 
@@ -242,9 +255,10 @@ function calculatePattern(job, pattern){
 
 
 
-// =======================================
-// Kartonpositionen erzeugen
-// =======================================
+
+// ==========================================
+// Kartons erzeugen
+// ==========================================
 
 
 function createBoxes(
@@ -270,6 +284,8 @@ function createBoxes(
 
 
 
+
+
     for(
         let layer = 0;
         layer < layers;
@@ -288,24 +304,24 @@ function createBoxes(
 
             for(
                 let col = 0;
-                col < cols;
-                col++
+            col < cols;
+            col++
             ){
 
 
 
-                let offsetX = 0;
+                let x;
 
-                let offsetY = 0;
+                let y;
+
+                let currentRotation = 0;
+
 
 
 
                 /*
                 =================================
-                Kreuzverband
-
-                Jede zweite Lage wird
-                halb versetzt
+                Jede zweite Lage 180 Grad drehen
                 =================================
                 */
 
@@ -313,32 +329,52 @@ function createBoxes(
                 if(layer % 2 === 1){
 
 
-                    offsetX =
-                        boxLength / 2;
+                    x =
+
+                    (
+                        cols - 1 - col
+
+                    )
+                    *
+                    boxLength;
 
 
-                    offsetY =
-                        boxWidth / 2;
+
+                    y =
+
+                    (
+                        rows - 1 - row
+
+                    )
+                    *
+                    boxWidth;
+
+
+
+                    currentRotation = 180;
+
 
 
                 }
 
+                else{
+
+
+                    x =
+
+                    col *
+                    boxLength;
 
 
 
-                let rot = rotation;
+                    y =
+
+                    row *
+                    boxWidth;
 
 
 
-                if(rotation === "alternate"){
-
-
-                    rot =
-                    layer % 2 === 0
-                    ?
-                    0
-                    :
-                    90;
+                    currentRotation = 0;
 
 
                 }
@@ -350,49 +386,46 @@ function createBoxes(
                 boxes.push({
 
 
-                    x:
 
-                        col * boxLength +
-                        offsetX,
+                    x,
 
-
-
-                    y:
-
-                        row * boxWidth +
-                        offsetY,
-
+                    y,
 
 
                     z:
 
-                        layer * boxHeight,
+                    layer *
+                    boxHeight,
 
 
 
                     length:
-                        boxLength,
+
+                    boxLength,
 
 
 
                     width:
-                        boxWidth,
+
+                    boxWidth,
 
 
 
                     height:
-                        boxHeight,
+
+                    boxHeight,
 
 
 
                     rotation:
-                        rot,
+
+                    currentRotation,
 
 
 
                     layer:
-                        layer + 1
 
+                    layer + 1
 
 
                 });
