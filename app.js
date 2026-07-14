@@ -2,39 +2,36 @@
 ==================================================
  Europal Optimizer Pro
  App
- Version 0.2.0
+ Version 0.3.0
 ==================================================
 */
 
 document.addEventListener("DOMContentLoaded", initApp);
 
-// Aktuelle Ansicht
 let currentView = "top";
 
-// Aktuelle Daten merken
 let currentJob = null;
 let currentVariant = null;
 
 function initApp() {
 
-    document
-        .getElementById("maxHeight")
-        .value = SETTINGS.defaultMaxHeight;
+    document.getElementById("maxHeight").value =
+        SETTINGS.defaultMaxHeight;
 
     document
         .getElementById("calculate")
         .addEventListener("click", calculate);
 
-    // Ansichten umschalten
     addViewEvents();
 
 }
 
 function calculate() {
 
-    const palletKey = document.getElementById("pallet").value;
+    const palletKey =
+        document.getElementById("pallet").value;
 
-    const job = {
+    currentJob = {
 
         pallet: PALLETS[palletKey],
 
@@ -60,168 +57,110 @@ function calculate() {
 
     if (
 
-        job.box.length <= 0 ||
-        job.box.width <= 0 ||
-        job.box.height <= 0
+        currentJob.box.length <= 0 ||
+        currentJob.box.width <= 0 ||
+        currentJob.box.height <= 0
 
     ) {
 
         alert("Bitte gültige Kartonmaße eingeben.");
+
         return;
 
     }
 
-    const variants = optimize(job);
+    const variants = optimize(currentJob);
 
-    if (variants.length === 0) {
+    if (!variants.length) {
 
         alert("Keine Variante gefunden.");
+
         return;
 
     }
 
-    const best = variants[0];
+    currentVariant = variants[0];
 
-    currentJob = job;
-    currentVariant = best;
-
-    updateDashboard(best);
+    updateDashboard();
 
     drawCurrentView();
 
 }
 
-function updateDashboard(best){
+function updateDashboard() {
 
     document.getElementById("layer").textContent =
-        best.cartonsPerLayer;
+        currentVariant.cartonsPerLayer;
 
     document.getElementById("layers").textContent =
-        best.layers;
+        currentVariant.layers;
 
     document.getElementById("total").textContent =
-        best.totalCartons;
+        currentVariant.totalCartons;
 
     document.getElementById("utilization").textContent =
-        best.utilization + " %";
+        currentVariant.utilization + " %";
 
 }
 
-function drawCurrentView(){
+function drawCurrentView() {
 
-    if(!currentVariant) return;
+    if (!currentVariant) return;
 
-    switch(currentView){
+    drawVariant(
 
-        case "top":
+        "canvas",
 
-            drawVariant(
-                "canvas",
-                currentVariant,
-                currentJob.pallet
-            );
+        currentVariant,
 
-            break;
+        currentJob.pallet
 
-        case "layer1":
-
-            drawVariant(
-                "canvas",
-                currentVariant,
-                currentJob.pallet
-            );
-
-            break;
-
-        case "layer2":
-
-            drawVariant(
-                "canvas",
-                currentVariant,
-                currentJob.pallet
-            );
-
-            break;
-
-        case "iso":
-
-            if(typeof drawIsometric === "function"){
-
-                drawIsometric(
-                    "canvas",
-                    currentVariant,
-                    currentJob.pallet
-                );
-
-            }else{
-
-                drawVariant(
-                    "canvas",
-                    currentVariant,
-                    currentJob.pallet
-                );
-
-            }
-
-            break;
-
-    }
+    );
 
 }
 
-function addViewEvents(){
+function addViewEvents() {
 
-    const top = document.getElementById("viewTop");
-    const iso = document.getElementById("viewIso");
-    const layer1 = document.getElementById("viewLayer1");
-    const layer2 = document.getElementById("viewLayer2");
+    const views = {
 
-    if(top){
+        viewTop: "top",
 
-        top.onclick = ()=>{
+        viewIso: "iso",
 
-            currentView="top";
+        viewLayer1: "layer1",
 
-            drawCurrentView();
+        viewLayer2: "layer2"
 
-        };
+    };
 
-    }
+    Object.keys(views).forEach(id => {
 
-    if(iso){
+        const button = document.getElementById(id);
 
-        iso.onclick = ()=>{
+        if (!button) return;
 
-            currentView="iso";
+        button.addEventListener("click", () => {
 
-            drawCurrentView();
+            currentView = views[id];
 
-        };
+            document
+                .querySelectorAll(".viewButton")
+                .forEach(btn => {
 
-    }
+                    btn.classList.remove("btn-primary");
 
-    if(layer1){
+                    btn.classList.add("btn-outline-primary");
 
-        layer1.onclick = ()=>{
+                });
 
-            currentView="layer1";
+            button.classList.remove("btn-outline-primary");
 
-            drawCurrentView();
-
-        };
-
-    }
-
-    if(layer2){
-
-        layer2.onclick = ()=>{
-
-            currentView="layer2";
+            button.classList.add("btn-primary");
 
             drawCurrentView();
 
-        };
+        });
 
-    }
+    });
 
 }
