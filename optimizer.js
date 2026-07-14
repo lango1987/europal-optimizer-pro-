@@ -2,8 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 6.0
- Randfüllung + Wechsellagen
+ Version 7.0
+ Ebenen sauber getrennt
 ==================================================
 */
 
@@ -11,20 +11,11 @@
 function optimize(job){
 
 
-
-    const variant =
-
-        calculateVariant(job);
-
-
-
-
     return [
 
-        variant
+        calculateVariant(job)
 
     ];
-
 
 
 }
@@ -60,22 +51,17 @@ function calculateVariant(job){
 
 
 
+    let boxes = [];
 
-
-    const boxes=[];
 
 
 
 
 
     for(
-
-        let layer=0;
-
-        layer<layers;
-
+        let layer = 0;
+        layer < layers;
         layer++
-
     ){
 
 
@@ -88,23 +74,16 @@ function calculateVariant(job){
 
 
 
+
         const layerBoxes =
 
             packLayer(
 
-                job.pallet.length,
-
-                job.pallet.width,
-
-                job.box.length,
-
-                job.box.width,
+                job,
 
                 rotated,
 
-                layer,
-
-                job.box.height
+                layer
 
             );
 
@@ -112,8 +91,11 @@ function calculateVariant(job){
 
 
 
+
         boxes.push(
+
             ...layerBoxes
+
         );
 
 
@@ -129,7 +111,7 @@ function calculateVariant(job){
 
         boxes.filter(
 
-            b=>b.layer===1
+            b => b.layer === 1
 
         );
 
@@ -138,8 +120,7 @@ function calculateVariant(job){
 
 
 
-
-    const usedArea =
+    const area =
 
         firstLayer.reduce(
 
@@ -151,6 +132,7 @@ function calculateVariant(job){
                     b.length *
                     b.width
                 );
+
 
             },
 
@@ -166,8 +148,8 @@ function calculateVariant(job){
     const palletArea =
 
         job.pallet.length *
-
         job.pallet.width;
+
 
 
 
@@ -177,15 +159,16 @@ function calculateVariant(job){
     return {
 
 
+
         id:
 
-        "edge_fill",
+        "90degree",
 
 
 
         name:
 
-        "Randfüllung 90° Wechsellage",
+        "90° Wechsellage Randfüllung",
 
 
 
@@ -218,7 +201,7 @@ function calculateVariant(job){
         Number(
 
             (
-                usedArea /
+                area /
                 palletArea *
                 100
 
@@ -237,13 +220,14 @@ function calculateVariant(job){
     };
 
 
+
 }
 /*
 ==================================================
  Europal Optimizer Pro
  Optimizer
  Teil 2
- Packalgorithmus
+ PackLayer
 ==================================================
 */
 
@@ -256,19 +240,11 @@ function calculateVariant(job){
 
 function packLayer(
 
-    palletLength,
-
-    palletWidth,
-
-    boxLength,
-
-    boxWidth,
+    job,
 
     rotated,
 
-    layer,
-
-    height
+    layer
 
 ){
 
@@ -290,13 +266,21 @@ function packLayer(
 
 
 
+
+
     if(rotated){
 
 
 
-        length = boxWidth;
+        length =
+            job.box.width;
 
-        width = boxLength;
+
+
+        width =
+            job.box.length;
+
+
 
         rotation = 90;
 
@@ -308,9 +292,15 @@ function packLayer(
 
 
 
-        length = boxLength;
+        length =
+            job.box.length;
 
-        width = boxWidth;
+
+
+        width =
+            job.box.width;
+
+
 
         rotation = 0;
 
@@ -324,7 +314,22 @@ function packLayer(
 
 
 
-    const occupied=[];
+    const palletLength =
+        job.pallet.length;
+
+
+
+    const palletWidth =
+        job.pallet.width;
+
+
+
+
+
+
+
+
+    const occupied = [];
 
 
 
@@ -333,148 +338,31 @@ function packLayer(
 
 
     // ==================================
-    // Ecke links oben
+    // Raster füllen
     // ==================================
 
 
-    addBoxesFromArea(
+    for(
 
-        boxes,
+        let y = 0;
 
-        occupied,
+        y + width <= palletWidth;
 
-        0,
-
-        0,
-
-        palletLength,
-
-        palletWidth,
-
-        length,
-
-        width,
-
-        rotation,
-
-        layer,
-
-        height
-
-    );
-
-
-
-
-
-
-
-
-    // ==================================
-    // Restbereiche prüfen
-    // ==================================
-
-
-    fillRemainingAreas(
-
-        boxes,
-
-        occupied,
-
-        palletLength,
-
-        palletWidth,
-
-        length,
-
-        width,
-
-        rotation,
-
-        layer,
-
-        height
-
-    );
-
-
-
-
-
-
-    return boxes;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Kartons in Fläche setzen
-// ======================================
-
-
-function addBoxesFromArea(
-
-    boxes,
-
-    occupied,
-
-    startX,
-
-    startY,
-
-    areaWidth,
-
-    areaHeight,
-
-    boxLength,
-
-    boxWidth,
-
-    rotation,
-
-    layer,
-
-    height
-
-){
-
-
-
-    let y = startY;
-
-
-
-
-
-    while(
-
-        y + boxWidth <=
-
-        startY + areaHeight
+        y += width
 
     ){
 
 
 
-        let x = startX;
 
 
+        for(
 
+            let x = 0;
 
+            x + length <= palletLength;
 
-        while(
-
-            x + boxLength <=
-
-            startX + areaWidth
+            x += length
 
         ){
 
@@ -484,7 +372,7 @@ function addBoxesFromArea(
 
             if(
 
-                !collision(
+                checkFree(
 
                     occupied,
 
@@ -492,9 +380,9 @@ function addBoxesFromArea(
 
                     y,
 
-                    boxLength,
+                    length,
 
-                    boxWidth
+                    width
 
                 )
 
@@ -502,37 +390,36 @@ function addBoxesFromArea(
 
 
 
-                const box={
+                const box = {
 
 
 
                     x:x,
 
+
+
                     y:y,
+
+
 
                     z:
 
                     layer *
-
-                    height,
-
-
-
-                    length:
-
-                    boxLength,
+                    job.box.height,
 
 
 
-                    width:
+                    length:length,
 
-                    boxWidth,
+
+
+                    width:width,
 
 
 
                     height:
 
-                    height,
+                    job.box.height,
 
 
 
@@ -544,7 +431,7 @@ function addBoxesFromArea(
 
                     layer:
 
-                    layer+1
+                    layer + 1
 
 
 
@@ -566,24 +453,51 @@ function addBoxesFromArea(
 
 
 
-
-
-            x += boxLength;
-
-
-
         }
-
-
-
-
-
-        y += boxWidth;
-
 
 
     }
 
+
+
+
+
+
+
+    // ==================================
+    // Restflächen nachfüllen
+    // ==================================
+
+
+    fillEdges(
+
+        boxes,
+
+        occupied,
+
+        palletLength,
+
+        palletWidth,
+
+        length,
+
+        width,
+
+        rotation,
+
+        layer,
+
+        job.box.height
+
+    );
+
+
+
+
+
+
+
+    return boxes;
 
 
 }
@@ -595,12 +509,13 @@ function addBoxesFromArea(
 
 
 
+
 // ======================================
-// Überlappung prüfen
+// Prüfen ob Platz frei ist
 // ======================================
 
 
-function collision(
+function checkFree(
 
     boxes,
 
@@ -616,21 +531,26 @@ function collision(
 
 
 
-    return boxes.some(box=>{
+    return !boxes.some(box=>{
 
 
         return !(
 
+
             x+w <= box.x ||
 
-            x >= box.x+box.length ||
+
+            x >= box.x + box.length ||
+
 
             y+h <= box.y ||
 
-            y >= box.y+box.width
+
+            y >= box.y + box.width
+
+
 
         );
-
 
 
     });
@@ -643,18 +563,18 @@ function collision(
  Europal Optimizer Pro
  Optimizer
  Teil 3
- Restflächen füllen
+ Randfüllung
 ==================================================
 */
 
 
 
 // ======================================
-// Restflächen füllen
+// Randbereiche füllen
 // ======================================
 
 
-function fillRemainingAreas(
+function fillEdges(
 
     boxes,
 
@@ -679,6 +599,8 @@ function fillRemainingAreas(
 
 
     const step = 10;
+
+
 
 
 
@@ -708,6 +630,7 @@ function fillRemainingAreas(
 
 
 
+
             if(
 
                 x + boxLength >
@@ -719,6 +642,7 @@ function fillRemainingAreas(
                 continue;
 
             }
+
 
 
 
@@ -742,9 +666,10 @@ function fillRemainingAreas(
 
 
 
+
             if(
 
-                !collision(
+                checkFree(
 
                     occupied,
 
@@ -762,7 +687,9 @@ function fillRemainingAreas(
 
 
 
-                const box={
+
+
+                const box = {
 
 
 
@@ -808,11 +735,13 @@ function fillRemainingAreas(
 
                     layer:
 
-                    layer+1
+                    layer + 1
 
 
 
                 };
+
+
 
 
 
@@ -831,389 +760,12 @@ function fillRemainingAreas(
 
 
 
+
         }
 
 
 
     }
-
-
-
-}
-/*
-==================================================
- Europal Optimizer Pro
- Optimizer
- Teil 4
- Bewertung + Stabilität
-==================================================
-*/
-
-
-
-// ======================================
-// Schwerpunkt berechnen
-// ======================================
-
-
-function calculateCenterOfGravity(
-
-    boxes
-
-){
-
-
-
-    let totalWeight = 0;
-
-
-
-    let centerX = 0;
-
-    let centerY = 0;
-
-
-
-    boxes.forEach(box=>{
-
-
-
-        const area =
-
-            box.length *
-            box.width;
-
-
-
-        totalWeight += area;
-
-
-
-
-
-        centerX +=
-
-            (
-                box.x +
-                box.length / 2
-
-            )
-            *
-            area;
-
-
-
-
-
-        centerY +=
-
-            (
-                box.y +
-                box.width / 2
-
-            )
-            *
-            area;
-
-
-
-    });
-
-
-
-
-
-
-
-    if(totalWeight===0){
-
-
-        return {
-
-
-            x:0,
-
-            y:0
-
-
-        };
-
-
-    }
-
-
-
-
-
-    return {
-
-
-        x:
-
-        centerX /
-        totalWeight,
-
-
-
-        y:
-
-        centerY /
-        totalWeight
-
-
-
-    };
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Stabilität bewerten
-// ======================================
-
-
-function calculateStability(
-
-    boxes,
-
-    pallet
-
-){
-
-
-
-    const center =
-
-        calculateCenterOfGravity(
-
-            boxes
-
-        );
-
-
-
-
-
-    const palletCenterX =
-
-        pallet.length / 2;
-
-
-
-    const palletCenterY =
-
-        pallet.width / 2;
-
-
-
-
-
-
-    const distance =
-
-        Math.sqrt(
-
-            Math.pow(
-
-                center.x -
-                palletCenterX,
-
-                2
-
-            )
-
-            +
-
-            Math.pow(
-
-                center.y -
-                palletCenterY,
-
-                2
-
-            )
-
-        );
-
-
-
-
-
-
-    const maxDistance =
-
-        Math.sqrt(
-
-            Math.pow(
-
-                pallet.length/2,
-
-                2
-
-            )
-
-            +
-
-            Math.pow(
-
-                pallet.width/2,
-
-                2
-
-            )
-
-        );
-
-
-
-
-
-
-
-    let score =
-
-        100 -
-
-        (
-            distance /
-            maxDistance *
-            100
-
-        );
-
-
-
-
-
-    if(score < 0){
-
-        score = 0;
-
-    }
-
-
-
-    return Number(
-
-        score.toFixed(1)
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Gewicht prüfen
-// ======================================
-
-
-function calculateWeightLoad(
-
-    boxes,
-
-    weight
-
-){
-
-
-
-    return (
-
-        boxes.length *
-        weight
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================
-// Variante verbessern
-// ======================================
-
-
-function rateVariant(
-
-    variant,
-
-    job
-
-){
-
-
-
-    const stability =
-
-        calculateStability(
-
-            variant.boxes,
-
-            job.pallet
-
-        );
-
-
-
-
-
-
-    const weight =
-
-        calculateWeightLoad(
-
-            variant.boxes,
-
-            job.box.weight
-
-        );
-
-
-
-
-
-    variant.stability =
-
-        stability;
-
-
-
-
-
-    variant.totalWeight =
-
-        weight;
-
-
-
-
-
-    return variant;
 
 
 
