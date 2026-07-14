@@ -2,8 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  canvas.js
- Version 2.0
- 2D + echte 3D Darstellung
+ Pattern 3D Viewer
+ Version 3.0
 ==================================================
 */
 
@@ -13,15 +13,14 @@ let canvas;
 let ctx;
 
 
-let currentVariant = null;
+let currentResult = null;
 
 let currentPallet = null;
 
 
 let viewMode = "top";
 
-let activeLayer = 1;
-
+let selectedLayer = 0;
 
 
 
@@ -29,30 +28,23 @@ let activeLayer = 1;
 
 
 // ======================================
-// Canvas starten
+// Start
 // ======================================
 
 
 function initCanvas(){
 
 
-    canvas = document.getElementById(
+    canvas =
+    document.getElementById(
         "canvas"
     );
 
 
-    if(!canvas){
-
-        return;
-
-    }
-
-
-
-    ctx = canvas.getContext(
+    ctx =
+    canvas.getContext(
         "2d"
     );
-
 
 
     resizeCanvas();
@@ -69,20 +61,17 @@ function initCanvas(){
 function resizeCanvas(){
 
 
-    if(!canvas){
-
-        return;
-
-    }
+    if(!canvas)return;
 
 
 
     canvas.width =
-        canvas.clientWidth;
+    canvas.clientWidth;
+
 
 
     canvas.height =
-        canvas.clientHeight;
+    canvas.clientHeight;
 
 
 
@@ -99,9 +88,9 @@ function resizeCanvas(){
 
 window.addEventListener(
 
-    "resize",
+"resize",
 
-    resizeCanvas
+resizeCanvas
 
 );
 
@@ -114,31 +103,23 @@ window.addEventListener(
 
 
 // ======================================
-// Verbindung mit app.js
+// Daten übernehmen
 // ======================================
 
 
 function drawVariant(
 
-    id,
+id,
 
-    variant,
+result,
 
-    pallet
+pallet
 
 ){
 
 
 
-    if(!ctx){
-
-        initCanvas();
-
-    }
-
-
-
-    currentVariant = variant;
+    currentResult = result;
 
 
     currentPallet = pallet;
@@ -160,16 +141,15 @@ function drawVariant(
 
 
 // ======================================
-// Ansicht ändern
+// Ansicht
 // ======================================
 
 
 function setView(
 
-    mode
+mode
 
 ){
-
 
 
     viewMode = mode;
@@ -178,7 +158,6 @@ function setView(
     drawCanvas();
 
 
-
 }
 
 
@@ -187,22 +166,14 @@ function setView(
 
 
 
-
-
-// ======================================
-// Lage auswählen
-// ======================================
-
-
 function setLayer(
 
-    layer
+layer
 
 ){
 
 
-
-    activeLayer = layer;
+    selectedLayer = layer;
 
 
     viewMode = "layer";
@@ -211,7 +182,6 @@ function setLayer(
     drawCanvas();
 
 
-
 }
 
 
@@ -223,26 +193,24 @@ function setLayer(
 
 
 // ======================================
-// Hauptzeichnung
+// Hauptfunktion
 // ======================================
 
 
 function drawCanvas(){
 
 
-
     if(
 
         !ctx ||
 
-        !currentVariant
+        !currentResult
 
     ){
 
         return;
 
     }
-
 
 
 
@@ -265,11 +233,7 @@ function drawCanvas(){
 
 
 
-    if(
-
-        viewMode === "top"
-
-    ){
+    if(viewMode==="top"){
 
 
         drawTopView();
@@ -282,11 +246,8 @@ function drawCanvas(){
 
 
 
-    if(
 
-        viewMode === "layer"
-
-    ){
+    if(viewMode==="layer"){
 
 
         drawLayerView();
@@ -299,11 +260,8 @@ function drawCanvas(){
 
 
 
-    if(
 
-        viewMode === "3d"
-
-    ){
+    if(viewMode==="3d"){
 
 
         draw3DView();
@@ -325,7 +283,7 @@ function drawCanvas(){
 
 
 // ======================================
-// Draufsicht
+// Alle Kartons von oben
 // ======================================
 
 
@@ -341,15 +299,11 @@ function drawTopView(){
 
 
 
-    currentVariant.boxes.forEach(box=>{
+    currentResult.boxes.forEach(box=>{
 
 
 
-        drawBox2D(
-
-            box
-
-        );
+        drawBox2D(box);
 
 
 
@@ -368,7 +322,7 @@ function drawTopView(){
 
 
 // ======================================
-// einzelne Lage
+// Eine Lage anzeigen
 // ======================================
 
 
@@ -384,7 +338,7 @@ function drawLayerView(){
 
 
 
-    currentVariant.boxes
+    currentResult.boxes
 
     .filter(box=>{
 
@@ -392,7 +346,9 @@ function drawLayerView(){
 
         return (
 
-            box.layer === activeLayer
+            box.layer ===
+
+            selectedLayer
 
         );
 
@@ -404,11 +360,7 @@ function drawLayerView(){
 
 
 
-        drawBox2D(
-
-            box
-
-        );
+        drawBox2D(box);
 
 
 
@@ -437,7 +389,7 @@ function drawPallet2D(){
 
     const scale =
 
-        get2DScale();
+        getScale2D();
 
 
 
@@ -447,7 +399,7 @@ function drawPallet2D(){
 
     const offset =
 
-        get2DOffset(
+        getOffset2D(
 
             scale
 
@@ -556,7 +508,7 @@ function drawBox2D(
 
     const scale =
 
-        get2DScale();
+        getScale2D();
 
 
 
@@ -566,12 +518,11 @@ function drawBox2D(
 
     const offset =
 
-        get2DOffset(
+        getOffset2D(
 
             scale
 
         );
-
 
 
 
@@ -621,24 +572,6 @@ function drawBox2D(
 
 
 
-    ctx.strokeStyle =
-
-        "#333";
-
-
-
-
-
-
-
-    ctx.lineWidth = 1;
-
-
-
-
-
-
-
     ctx.fillRect(
 
 
@@ -666,6 +599,12 @@ function drawBox2D(
 
 
 
+
+
+
+    ctx.strokeStyle =
+
+        "#333";
 
 
 
@@ -699,7 +638,7 @@ function drawBox2D(
 
 
 
-    drawArrow2D(
+    drawRotationArrow(
 
         box,
 
@@ -728,7 +667,7 @@ function drawBox2D(
 // ======================================
 
 
-function get2DScale(){
+function getScale2D(){
 
 
 
@@ -736,13 +675,13 @@ function get2DScale(){
 
 
 
-        600 /
+        650 /
 
         currentPallet.length,
 
 
 
-        600 /
+        650 /
 
         currentPallet.width
 
@@ -762,7 +701,7 @@ function get2DScale(){
 
 
 
-function get2DOffset(
+function getOffset2D(
 
     scale
 
@@ -821,11 +760,11 @@ function get2DOffset(
 
 
 // ======================================
-// Richtungspfeil
+// Richtung anzeigen
 // ======================================
 
 
-function drawArrow2D(
+function drawRotationArrow(
 
     box,
 
@@ -863,7 +802,7 @@ function drawArrow2D(
 
     if(
 
-        box.length >= box.width
+        box.rotation === 90
 
     ){
 
@@ -871,35 +810,27 @@ function drawArrow2D(
 
         ctx.moveTo(
 
+            x +
+
+            box.length *
+
+            scale/2,
 
 
-            x + 10,
 
-            y +
-
-            box.width *
-
-            scale /2
-
-
+            y+10
 
         );
 
 
 
-
-
-
-
         ctx.lineTo(
-
-
 
             x +
 
             box.length *
 
-            scale -10,
+            scale/2,
 
 
 
@@ -907,9 +838,9 @@ function drawArrow2D(
 
             box.width *
 
-            scale /2
+            scale -
 
-
+            10
 
         );
 
@@ -923,37 +854,7 @@ function drawArrow2D(
 
         ctx.moveTo(
 
-
-
-            x +
-
-            box.length *
-
-            scale /2,
-
-
-
-            y + 10
-
-
-
-        );
-
-
-
-
-
-
-
-        ctx.lineTo(
-
-
-
-            x +
-
-            box.length *
-
-            scale /2,
+            x+10,
 
 
 
@@ -961,9 +862,29 @@ function drawArrow2D(
 
             box.width *
 
-            scale -10
+            scale/2
+
+        );
 
 
+
+        ctx.lineTo(
+
+            x +
+
+            box.length *
+
+            scale -
+
+            10,
+
+
+
+            y +
+
+            box.width *
+
+            scale/2
 
         );
 
@@ -992,7 +913,7 @@ function drawArrow2D(
 
 
 // ======================================
-// Lagefarben
+// Farbe nach Lage
 // ======================================
 
 
@@ -1004,6 +925,9 @@ function getLayerColor(
 
 
 
+    // Muster A
+
+
     if(
 
         layer % 2 === 1
@@ -1012,7 +936,7 @@ function getLayerColor(
 
 
 
-        return "#d2a15d";
+        return "#d19a52";
 
 
 
@@ -1020,7 +944,14 @@ function getLayerColor(
 
 
 
-    return "#9fc5e8";
+
+
+
+
+    // Muster B
+
+
+    return "#8fb7d8";
 
 
 
@@ -1029,14 +960,14 @@ function getLayerColor(
 ==================================================
  canvas.js
  Teil 3
- 3D Engine
+ 3D Ansicht
 ==================================================
 */
 
 
 
 // ======================================
-// 3D Ansicht
+// 3D Hauptansicht
 // ======================================
 
 
@@ -1054,7 +985,11 @@ function draw3DView(){
 
     const boxes =
 
-        [...currentVariant.boxes];
+        [
+
+            ...currentResult.boxes
+
+        ];
 
 
 
@@ -1062,8 +997,8 @@ function draw3DView(){
 
 
 
-    // hinten nach vorne zeichnen
 
+    // richtige Zeichenreihenfolge
 
     boxes.sort((a,b)=>{
 
@@ -1073,11 +1008,11 @@ function draw3DView(){
 
 
 
-            a.x +
+            a.z +
 
             a.y +
 
-            a.z
+            a.x
 
 
 
@@ -1089,11 +1024,11 @@ function draw3DView(){
 
 
 
-            b.x +
+            b.z +
 
             b.y +
 
-            b.z
+            b.x
 
 
 
@@ -1140,7 +1075,7 @@ function draw3DView(){
 // ======================================
 
 
-function project3D(
+function iso(
 
     x,
 
@@ -1152,7 +1087,9 @@ function project3D(
 
 
 
-    const scale = 0.45;
+    const scale =
+
+        0.45;
 
 
 
@@ -1165,8 +1102,6 @@ function project3D(
 
 
         x:
-
-
 
         canvas.width/2
 
@@ -1190,14 +1125,11 @@ function project3D(
 
 
 
-
         y:
-
-
 
         canvas.height *
 
-        0.70
+        0.72
 
         +
 
@@ -1248,9 +1180,9 @@ function drawPallet3D(){
 
 
 
-    const p1 =
+    const a =
 
-        project3D(
+        iso(
 
             0,
 
@@ -1264,9 +1196,9 @@ function drawPallet3D(){
 
 
 
-    const p2 =
+    const b =
 
-        project3D(
+        iso(
 
             currentPallet.length,
 
@@ -1280,9 +1212,9 @@ function drawPallet3D(){
 
 
 
-    const p3 =
+    const c =
 
-        project3D(
+        iso(
 
             currentPallet.length,
 
@@ -1296,9 +1228,9 @@ function drawPallet3D(){
 
 
 
-    const p4 =
+    const d =
 
-        project3D(
+        iso(
 
             0,
 
@@ -1314,21 +1246,21 @@ function drawPallet3D(){
 
 
 
-    drawPolygon(
+    drawPolygon3D(
 
         [
 
-            p1,
+            a,
 
-            p2,
+            b,
 
-            p3,
+            c,
 
-            p4
+            d
 
         ],
 
-        "#b88952"
+        "#b88950"
 
     );
 
@@ -1345,11 +1277,11 @@ function drawPallet3D(){
 
 
 // ======================================
-// Polygon zeichnen
+// Polygon
 // ======================================
 
 
-function drawPolygon(
+function drawPolygon3D(
 
     points,
 
@@ -1411,7 +1343,9 @@ function drawPolygon(
 
 
 
-    ctx.fillStyle = color;
+    ctx.fillStyle =
+
+        color;
 
 
 
@@ -1419,7 +1353,9 @@ function drawPolygon(
 
 
 
-    ctx.strokeStyle = "#4e342e";
+    ctx.strokeStyle =
+
+        "#4a3728";
 
 
 
@@ -1432,7 +1368,7 @@ function drawPolygon(
 ==================================================
  canvas.js
  Teil 4
- 3D Kartons
+ 3D Karton
 ==================================================
 */
 
@@ -1467,7 +1403,7 @@ function drawBox3D(
 
 
 
-    // Drehung berücksichtigen
+    // Rotation beachten
 
 
     if(
@@ -1497,11 +1433,7 @@ function drawBox3D(
 
     const x = box.x;
 
-
-
     const y = box.y;
-
-
 
     const z = box.z || 0;
 
@@ -1516,12 +1448,12 @@ function drawBox3D(
 
 
 
-    // Untere Ecken
+    // untere Punkte
 
 
     const p1 =
 
-        project3D(
+        iso(
 
             x,
 
@@ -1530,44 +1462,50 @@ function drawBox3D(
             z
 
         );
+
+
 
 
 
     const p2 =
 
-        project3D(
+        iso(
 
-            x+length,
+            x + length,
 
             y,
 
             z
 
         );
+
+
 
 
 
     const p3 =
 
-        project3D(
+        iso(
 
-            x+length,
+            x + length,
 
-            y+width,
+            y + width,
 
             z
 
         );
+
+
 
 
 
     const p4 =
 
-        project3D(
+        iso(
 
             x,
 
-            y+width,
+            y + width,
 
             z
 
@@ -1579,12 +1517,13 @@ function drawBox3D(
 
 
 
-    // Obere Ecken
+
+    // obere Punkte
 
 
     const t1 =
 
-        project3D(
+        iso(
 
             x,
 
@@ -1593,14 +1532,16 @@ function drawBox3D(
             z+h
 
         );
+
+
 
 
 
     const t2 =
 
-        project3D(
+        iso(
 
-            x+length,
+            x + length,
 
             y,
 
@@ -1610,27 +1551,31 @@ function drawBox3D(
 
 
 
+
+
     const t3 =
 
-        project3D(
+        iso(
 
-            x+length,
+            x + length,
 
-            y+width,
+            y + width,
 
             z+h
 
         );
+
+
 
 
 
     const t4 =
 
-        project3D(
+        iso(
 
             x,
 
-            y+width,
+            y + width,
 
             z+h
 
@@ -1644,10 +1589,12 @@ function drawBox3D(
 
 
 
+    // ==================================
     // Oberseite
+    // ==================================
 
 
-    drawPolygon(
+    drawPolygon3D(
 
         [
 
@@ -1676,11 +1623,12 @@ function drawBox3D(
 
 
 
-
+    // ==================================
     // Vorderseite
+    // ==================================
 
 
-    drawPolygon(
+    drawPolygon3D(
 
         [
 
@@ -1694,7 +1642,7 @@ function drawBox3D(
 
         ],
 
-        "#b8864b"
+        "#b98246"
 
     );
 
@@ -1705,11 +1653,12 @@ function drawBox3D(
 
 
 
+    // ==================================
+    // Rechte Seite
+    // ==================================
 
-    // Seitenfläche
 
-
-    drawPolygon(
+    drawPolygon3D(
 
         [
 
@@ -1723,9 +1672,23 @@ function drawBox3D(
 
         ],
 
-        "#8d6239"
+        "#8c6035"
 
     );
+
+
+
+
+
+
+
+
+    // Umrandung
+
+
+    ctx.strokeStyle =
+
+        "#333";
 
 
 
@@ -1740,12 +1703,12 @@ function drawBox3D(
 
 
 // ======================================
-// Abschluss
+// fertig
 // ======================================
 
 
 console.log(
 
-    "Canvas Version 2.0 geladen"
+    "Canvas Pattern 3D Viewer geladen"
 
 );
