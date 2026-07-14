@@ -6,23 +6,46 @@
 ==================================================
 */
 
+
 let currentView = "top";
 
+
 let currentJob = null;
+
 
 let currentVariant = null;
 
 
+
+
 document.addEventListener(
+
     "DOMContentLoaded",
+
     initApp
+
 );
+
+
+
+
+
+
+
+// ======================================
+// Start
+// ======================================
 
 
 function initApp(){
 
+
+
     const maxHeight =
-        document.getElementById("maxHeight");
+        document.getElementById(
+            "maxHeight"
+        );
+
 
 
     if(maxHeight){
@@ -33,205 +56,371 @@ function initApp(){
     }
 
 
-    const calculate =
-        document.getElementById("calculate");
 
 
-    if(calculate){
-
-        calculate.addEventListener(
-            "click",
-            calculateOptimization
+    const button =
+        document.getElementById(
+            "calculate"
         );
+
+
+
+    if(button){
+
+
+        button.addEventListener(
+
+            "click",
+
+            calculate
+
+        );
+
 
     }
 
 
-    setupButtons();
+
+
+    setupViewButtons();
+
+
 
 }
 
 
 
-// =======================================
-// Berechnung
-// =======================================
 
-function calculateOptimization(){
+
+
+
+// ======================================
+// Berechnung
+// ======================================
+
+
+function calculate(){
+
+
 
     const palletSelect =
-        document.getElementById("pallet");
+        document.getElementById(
+            "pallet"
+        );
+
 
 
     const job = {
 
+
         pallet:
-            PALLETS[palletSelect.value],
+
+            PALLETS[
+                palletSelect.value
+            ],
 
 
-        box: {
+
+
+        box:{
+
 
             length:
+
                 Number(
-                    document.getElementById("length").value
+
+                    document.getElementById(
+                        "length"
+                    ).value
+
                 ),
+
+
 
             width:
+
                 Number(
-                    document.getElementById("width").value
+
+                    document.getElementById(
+                        "width"
+                    ).value
+
                 ),
+
+
 
             height:
+
                 Number(
-                    document.getElementById("height").value
+
+                    document.getElementById(
+                        "height"
+                    ).value
+
                 ),
 
+
+
             weight:
+
                 Number(
-                    document.getElementById("weight").value
+
+                    document.getElementById(
+                        "weight"
+                    ).value
+
                 )
+
 
         },
 
 
-        settings: {
+
+
+        settings:{
+
 
             maxHeight:
+
                 Number(
-                    document.getElementById("maxHeight").value
+
+                    document.getElementById(
+                        "maxHeight"
+                    ).value
+
                 )
+
 
         }
 
+
     };
+
+
+
+
+
+
 
 
     if(
 
         !job.pallet ||
 
-        job.box.length <=0 ||
+        job.box.length<=0 ||
 
-        job.box.width <=0 ||
+        job.box.width<=0 ||
 
-        job.box.height <=0
+        job.box.height<=0
+
 
     ){
 
+
         alert(
-            "Bitte gültige Kartondaten eingeben."
+
+            "Bitte gültige Werte eingeben."
+
         );
+
 
         return;
 
+
     }
+
+
+
 
 
 
     const variants =
+
         optimize(job);
 
 
 
+
+
+
     if(
+
         !variants ||
+
         variants.length===0
+
+
     ){
 
+
         alert(
-            "Keine Optimierung möglich."
+
+            "Keine Variante gefunden."
+
         );
+
 
         return;
 
+
     }
+
+
+
+
+
 
 
     currentJob = job;
 
+
+
     currentVariant = variants[0];
 
 
+
+
+
+
     updateDashboard(
+
         currentVariant
+
     );
 
 
-    drawCurrentView();
+
+
+
+
+    drawCurrent();
+
+
+
+
+
+
+    showVariants(
+
+        variants
+
+    );
+
+
 
 }
 
 
 
-// =======================================
+
+
+
+
+// ======================================
 // Dashboard
-// =======================================
+// ======================================
+
 
 function updateDashboard(result){
 
 
-    const layer =
-        document.getElementById("layer");
 
+    setText(
 
-    const layers =
-        document.getElementById("layers");
+        "layer",
 
+        result.cartonsPerLayer
 
-    const total =
-        document.getElementById("total");
-
-
-    const util =
-        document.getElementById("utilization");
+    );
 
 
 
-    if(layer)
+    setText(
 
-        layer.textContent =
-            result.cartonsPerLayer;
+        "layers",
 
+        result.layers
 
-
-    if(layers)
-
-        layers.textContent =
-            result.layers;
+    );
 
 
 
-    if(total)
+    setText(
 
-        total.textContent =
-            result.totalCartons;
+        "total",
+
+        result.totalCartons
+
+    );
 
 
 
-    if(util)
+    setText(
 
-        util.textContent =
-            result.utilization+" %";
+        "utilization",
+
+        result.utilization+" %"
+
+    );
+
 
 
 }
 
 
 
-// =======================================
-// Zeichnen
-// =======================================
 
-function drawCurrentView(){
+
+
+function setText(id,value){
+
+
+
+    const el =
+        document.getElementById(id);
+
+
+
+    if(el){
+
+        el.textContent=value;
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+// ======================================
+// Zeichnen
+// ======================================
+
+
+function drawCurrent(){
+
+
 
     if(
+
         !currentVariant ||
+
         !currentJob
+
     ){
 
         return;
 
     }
+
+
+
+
 
 
     drawVariant(
@@ -244,59 +433,207 @@ function drawCurrentView(){
 
     );
 
+
 }
 
 
 
-// =======================================
-// Buttons
-// =======================================
-
-function setupButtons(){
 
 
-    const buttons = {
+
+
+// ======================================
+// Ansichten
+// ======================================
+
+
+function setupViewButtons(){
+
+
+
+    const buttons={
+
+
 
         viewTop:"top",
 
+
         viewIso:"iso",
+
 
         viewLayer1:"layer1",
 
+
         viewLayer2:"layer2"
+
 
     };
 
 
+
+
+
+
+
     Object.keys(buttons)
+
     .forEach(id=>{
 
 
-        const button =
+
+        const btn =
             document.getElementById(id);
 
 
 
-        if(!button)
+
+        if(!btn){
 
             return;
 
+        }
 
 
-        button.onclick=function(){
+
+
+
+
+        btn.onclick=function(){
+
 
 
             currentView =
                 buttons[id];
 
 
-            drawCurrentView();
+
+            drawCurrent();
+
 
 
         };
 
 
+
     });
+
+
+
+}
+
+
+
+
+
+
+
+// ======================================
+// Varianten
+// ======================================
+
+
+function showVariants(variants){
+
+
+
+    const box =
+        document.getElementById(
+            "variantList"
+        );
+
+
+
+    if(!box){
+
+        return;
+
+    }
+
+
+
+
+    box.innerHTML="";
+
+
+
+
+
+    variants.forEach((v,index)=>{
+
+
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+
+        div.className =
+            "alert alert-light";
+
+
+
+        div.innerHTML =
+
+
+
+        "<b>"+
+
+        (index+1)+
+
+        ". "+
+
+        v.name+
+
+        "</b><br>"+
+
+
+        "Kartons/Lage: "+
+
+        v.cartonsPerLayer+
+
+        "<br>"+
+
+
+        "Gesamt: "+
+
+        v.totalCartons+
+
+        "<br>"+
+
+
+        "Auslastung: "+
+
+        v.utilization+
+
+        "%";
+
+
+
+
+        div.onclick=function(){
+
+
+
+            currentVariant=v;
+
+
+            drawCurrent();
+
+
+
+        };
+
+
+
+
+        box.appendChild(div);
+
+
+
+    });
+
 
 
 }
