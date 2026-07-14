@@ -8,19 +8,16 @@
 
 const SETTINGS = {
 
-    // Standardwerte
     defaultMaxHeight: 1800,
 
-    // Zeichenbereich
     canvas: {
 
-        background: "#f8fafc",
+        margin: 40,
 
-        margin: 40
+        background: "#f5f7fa"
 
     },
 
-    // Isometrie
     iso: {
 
         scale: 0.18,
@@ -33,9 +30,6 @@ const SETTINGS = {
 
 };
 
-// ==============================
-// Paletten
-// ==============================
 
 const PALLETS = {
 
@@ -55,6 +49,7 @@ const PALLETS = {
 
     },
 
+
     industry: {
 
         id: "industry",
@@ -73,11 +68,10 @@ const PALLETS = {
 
 };
 
-// ==============================
-// Farben
-// ==============================
 
 const COLORS = {
+
+    background: "#f5f7fa",
 
     palletTop: "#D7B37A",
 
@@ -93,8 +87,6 @@ const COLORS = {
 
     boxBorder: "#6D573B",
 
-    shadow: "rgba(0,0,0,0.12)",
-
-    background: "#F5F7FA"
+    shadow: "rgba(0,0,0,0.12)"
 
 };
