@@ -2,104 +2,187 @@
 ==================================================
  Europal Optimizer Pro
  Canvas
- Version 3.0
+ Version 4.0
+ 180 Grad Wechsellagen
 ==================================================
 */
 
-function drawVariant(canvasId, variant, pallet) {
 
-    const canvas = document.getElementById(canvasId);
+function drawVariant(
+    canvasId,
+    variant,
+    pallet
+){
 
-    if (!canvas) return;
+    const canvas =
+        document.getElementById(canvasId);
 
-    const ctx = canvas.getContext("2d");
+
+    if(!canvas){
+
+        return;
+
+    }
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+
 
     ctx.clearRect(
+
         0,
+
         0,
+
         canvas.width,
+
         canvas.height
+
     );
 
-    // Hintergrund
 
-    ctx.fillStyle = COLORS.background;
 
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+    drawBackground(ctx);
 
-    switch (currentView) {
+
+
+    switch(currentView){
+
 
         case "iso":
 
+
             drawIsometric(
+
                 ctx,
+
                 variant,
+
                 pallet
+
             );
 
-            break;
+
+        break;
+
+
 
         case "layer1":
 
+
             drawTopView(
+
                 ctx,
+
                 variant,
+
                 pallet,
+
                 1
+
             );
 
-            break;
+
+        break;
+
+
 
         case "layer2":
 
+
             drawTopView(
+
                 ctx,
+
                 variant,
+
                 pallet,
+
                 2
+
             );
 
-            break;
+
+        break;
+
+
 
         default:
 
+
             drawTopView(
+
                 ctx,
+
                 variant,
+
                 pallet,
+
                 0
+
             );
 
     }
 
+
 }
 
 
-/* ===========================================
-   Draufsicht
-=========================================== */
+
+
+
+// =======================================
+// Draufsicht
+// =======================================
+
 
 function drawTopView(
+
     ctx,
+
     variant,
+
     pallet,
+
     layer
+
 ){
 
-    const margin = SETTINGS.canvas.margin;
+
+
+    const margin =
+        SETTINGS.canvas.margin;
+
+
 
     const scale = Math.min(
 
-        (ctx.canvas.width-margin*2)/pallet.length,
 
-        (ctx.canvas.height-margin*2)/pallet.width
+        (
+            ctx.canvas.width -
+            margin * 2
+
+        )
+        /
+        pallet.length,
+
+
+        (
+            ctx.canvas.height -
+            margin * 2
+
+        )
+        /
+        pallet.width
+
+
 
     );
+
+
+
 
     drawTopPallet(
 
@@ -109,206 +192,229 @@ function drawTopView(
 
         margin,
 
-        pallet.length*scale,
+        pallet.length * scale,
 
-        pallet.width*scale
+        pallet.width * scale
 
     );
+
+
+
 
     variant.boxes.forEach(box=>{
 
-        if(layer!==0){
 
-            if(box.layer!==layer){
+        if(layer !== 0){
+
+
+            if(box.layer !== layer){
+
 
                 return;
 
+
             }
+
 
         }
 
+
+
+
         drawTopBox(
+
 
             ctx,
 
-            margin + box.x*scale,
 
-            margin + box.y*scale,
+            margin +
+            box.x * scale,
 
-            box.length*scale,
 
-            box.width*scale,
+            margin +
+            box.y * scale,
+
+
+            box.length * scale,
+
+
+            box.width * scale,
+
 
             box.rotation
 
+
+
         );
+
 
     });
 
-}
 
-
-/* ===========================================
-   Palette oben
-=========================================== */
-
-function drawTopPallet(
-    ctx,
-    x,
-    y,
-    w,
-    h
-){
-
-    ctx.fillStyle = COLORS.palletTop;
-
-    ctx.fillRect(
-        x,
-        y,
-        w,
-        h
-    );
-
-    ctx.lineWidth = 3;
-
-    ctx.strokeStyle = COLORS.palletDark;
-
-    ctx.strokeRect(
-        x,
-        y,
-        w,
-        h
-    );
-
-    // Bretter
-
-    ctx.strokeStyle = COLORS.palletSide;
-
-    ctx.lineWidth = 2;
-
-    const boardHeight = h/5;
-
-    for(let i=1;i<5;i++){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x,
-            y+i*boardHeight
-        );
-
-        ctx.lineTo(
-            x+w,
-            y+i*boardHeight
-        );
-
-        ctx.stroke();
-
-    }
 
 }
 
 
-/* ===========================================
-   Karton oben
-=========================================== */
+
+
+
+// =======================================
+// Karton Draufsicht
+// =======================================
+
 
 function drawTopBox(
+
     ctx,
+
     x,
+
     y,
+
     w,
+
     h,
+
     rotation
+
 ){
 
-    ctx.fillStyle = COLORS.shadow;
+
+    ctx.fillStyle =
+        COLORS.boxTop;
+
+
+
+    ctx.strokeStyle =
+        COLORS.boxBorder;
+
+
+
+    ctx.lineWidth = 1;
+
+
 
     ctx.fillRect(
-        x+3,
-        y+3,
-        w,
-        h
-    );
 
-    ctx.fillStyle = COLORS.boxTop;
-
-    ctx.fillRect(
         x,
+
         y,
+
         w,
+
         h
+
     );
 
-    ctx.strokeStyle = COLORS.boxBorder;
+
 
     ctx.strokeRect(
+
         x,
+
         y,
+
         w,
+
         h
+
     );
+
+
+
+    // Richtung anzeigen
+
+    ctx.strokeStyle="#1976D2";
+
+
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        x+w/2,
-        y
-    );
 
-    ctx.lineTo(
-        x+w/2,
-        y+h
-    );
 
-    ctx.moveTo(
-        x,
-        y+h/2
-    );
+    if(rotation===180){
 
-    ctx.lineTo(
-        x+w,
-        y+h/2
-    );
-
-    ctx.stroke();
-
-    if(rotation===90){
-
-        ctx.strokeStyle="#c0392b";
-
-        ctx.beginPath();
 
         ctx.moveTo(
-            x,
-            y
+
+            x+w-10,
+
+            y+h/2
+
         );
+
 
         ctx.lineTo(
-            x+w,
-            y+h
+
+            x+10,
+
+            y+h/2
+
         );
 
-        ctx.stroke();
 
     }
 
+    else{
+
+
+        ctx.moveTo(
+
+            x+10,
+
+            y+h/2
+
+        );
+
+
+        ctx.lineTo(
+
+            x+w-10,
+
+            y+h/2
+
+        );
+
+
+    }
+
+
+
+    ctx.stroke();
+
+
+
 }
-/* ===========================================
-   Isometrische Ansicht
-=========================================== */
+// =======================================
+// Isometrische Ansicht
+// =======================================
+
 
 function drawIsometric(
+
     ctx,
+
     variant,
+
     pallet
+
 ){
 
-    const startX = SETTINGS.iso.startX;
 
-    const startY = SETTINGS.iso.startY;
+    const startX =
+        SETTINGS.iso.startX;
 
-    const scale = SETTINGS.iso.scale;
+
+    const startY =
+        SETTINGS.iso.startY;
+
+
+    const scale =
+        SETTINGS.iso.scale;
+
+
+
+    // Palette
 
     drawIsoPallet(
 
@@ -324,579 +430,251 @@ function drawIsometric(
 
     );
 
-    // Kartons nach hinten sortieren
 
-    const boxes = [...variant.boxes];
+
+
+    // Kartons sortieren
+    // hinten zuerst zeichnen
+
+
+    const boxes =
+        [...variant.boxes];
+
+
 
     boxes.sort((a,b)=>{
 
-        if((a.x+a.y)!==(b.x+b.y)){
 
-            return (a.x+a.y)-(b.x+b.y);
+        const depthA =
+            a.x + a.y + a.z;
 
-        }
 
-        return a.z-b.z;
+        const depthB =
+            b.x + b.y + b.z;
+
+
+
+        return depthA - depthB;
+
 
     });
 
+
+
+
+
     boxes.forEach(box=>{
 
-        const sx =
 
-            startX +
 
-            box.x*scale -
+        const point =
 
-            box.y*scale;
+            isoPoint(
 
-        const sy =
+                box.x,
 
-            startY +
+                box.y,
 
-            box.x*scale/2 +
+                box.z
 
-            box.y*scale/2 -
+            );
 
-            box.z*scale;
+
+
 
         drawIsoBox(
 
             ctx,
 
-            sx,
+            point.x,
 
-            sy,
+            point.y,
 
-            box.length*scale,
+            box.length * scale,
 
-            box.width*scale,
+            box.width * scale,
 
-            box.height*scale,
+            box.height * scale,
 
             box.rotation
 
+
         );
+
+
 
     });
 
+
+
 }
 
 
-/* ===========================================
-   Europalette Isometrisch
-=========================================== */
 
-function drawIsoPallet(
-    ctx,
+
+
+// =======================================
+// 3D Koordinaten umrechnen
+// =======================================
+
+
+function isoPoint(
+
     x,
+
     y,
-    l,
-    w
+
+    z
+
 ){
 
-    const h = 20;
 
-    // Oberseite
 
-    ctx.fillStyle = COLORS.palletTop;
+    const scale =
+        SETTINGS.iso.scale;
 
-    ctx.strokeStyle = COLORS.palletDark;
 
-    ctx.lineWidth = 2;
 
-    ctx.beginPath();
+    return {
 
-    ctx.moveTo(x,y);
 
-    ctx.lineTo(x+l,y+l/2);
+        x:
 
-    ctx.lineTo(x+l-w,y+l/2+w/2);
+            SETTINGS.iso.startX
 
-    ctx.lineTo(x-w,y+w/2);
+            +
 
-    ctx.closePath();
+            x * scale
 
-    ctx.fill();
+            -
 
-    ctx.stroke();
+            y * scale,
 
-    // Vorderseite
 
-    ctx.fillStyle = COLORS.palletSide;
 
-    ctx.beginPath();
+        y:
 
-    ctx.moveTo(x-w,y+w/2);
+            SETTINGS.iso.startY
 
-    ctx.lineTo(x+l-w,y+l/2+w/2);
+            +
 
-    ctx.lineTo(x+l-w,y+l/2+w/2+h);
+            (
+                x * scale / 2
+            )
 
-    ctx.lineTo(x-w,y+w/2+h);
+            +
 
-    ctx.closePath();
+            (
+                y * scale / 2
+            )
 
-    ctx.fill();
+            -
 
-    ctx.stroke();
+            (
+                z * scale
+            )
 
-    // Rechte Seite
 
-    ctx.fillStyle = COLORS.palletDark;
+    };
 
-    ctx.beginPath();
 
-    ctx.moveTo(x+l,y+l/2);
-
-    ctx.lineTo(x+l,y+l/2+h);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2+h);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2);
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
 
 }
-/* ===========================================
-   Isometrischer Karton
-=========================================== */
+// =======================================
+// 3D Karton zeichnen
+// =======================================
+
+
 function drawIsoBox(
+
     ctx,
+
     x,
+
     y,
+
     l,
+
     w,
+
     h,
+
     rotation
+
 ){
 
-    const depth = h * 0.15;
-
-
-    // ----------------------------
-    // Schatten
-    // ----------------------------
-
-    ctx.fillStyle = COLORS.shadow;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x - w + 8,
-        y + w/2 + h + 8
-    );
-
-    ctx.lineTo(
-        x + l - w + 8,
-        y + l/2 + w/2 + h + 8
-    );
-
-    ctx.lineTo(
-        x + l + 8,
-        y + l/2 + h + 8
-    );
-
-    ctx.lineTo(
-        x + 8,
-        y + h + 8
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-
-
-    // ----------------------------
-    // Oberseite
-    // ----------------------------
-
-    ctx.fillStyle = COLORS.boxTop;
-
-    ctx.strokeStyle = COLORS.boxBorder;
-
-    ctx.lineWidth = 1.5;
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(x,y);
-
-    ctx.lineTo(
-        x+l,
-        y+l/2
-    );
-
-    ctx.lineTo(
-        x+l-w,
-        y+l/2+w/2
-    );
-
-    ctx.lineTo(
-        x-w,
-        y+w/2
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
-
-
-
-    // ----------------------------
-    // Linke Vorderseite
-    // ----------------------------
-
-    ctx.fillStyle = COLORS.boxFront;
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x-w,
-        y+w/2
-    );
-
-    ctx.lineTo(
-        x+l-w,
-        y+l/2+w/2
-    );
-
-    ctx.lineTo(
-        x+l-w,
-        y+l/2+w/2+h
-    );
-
-    ctx.lineTo(
-        x-w,
-        y+w/2+h
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
-
-
-
-    // ----------------------------
-    // Rechte Seite
-    // ----------------------------
-
-    ctx.fillStyle = COLORS.boxSide;
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x+l,
-        y+l/2
-    );
-
-    ctx.lineTo(
-        x+l-w,
-        y+l/2+w/2
-    );
-
-    ctx.lineTo(
-        x+l-w,
-        y+l/2+w/2+h
-    );
-
-    ctx.lineTo(
-        x+l,
-        y+l/2+h
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
-
-
-
-    // ----------------------------
-    // Kartonband
-    // ----------------------------
-
-    ctx.strokeStyle="#8B7355";
-
-    ctx.lineWidth=1;
-
-
-    ctx.beginPath();
-
-
-    ctx.moveTo(
-        x-w/2,
-        y+w/4
-    );
-
-    ctx.lineTo(
-        x+l-w/2,
-        y+l/2+w/4
-    );
-
-
-    ctx.stroke();
-
-
-
-    // ----------------------------
-    // Drehung anzeigen
-    // ----------------------------
-
-    if(rotation===90){
-
-        ctx.strokeStyle="#1976D2";
-
-        ctx.lineWidth=2;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x,
-            y+5
-        );
-
-        ctx.lineTo(
-            x+l,
-            y+l/2+5
-        );
-
-        ctx.stroke();
-
-    }
-
-}
-
 
     // Schatten
 
-    ctx.fillStyle = COLORS.shadow;
+    ctx.fillStyle =
+        COLORS.shadow;
+
+
 
     ctx.beginPath();
 
-    ctx.moveTo(x-w+4,y+w/2+h+4);
 
-    ctx.lineTo(x+l-w+4,y+l/2+w/2+h+4);
+    ctx.moveTo(
 
-    ctx.lineTo(x+l+4,y+l/2+h+4);
+        x-w+5,
 
-    ctx.lineTo(x+4,y+h+4);
+        y+w/2+h+5
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w+5,
+
+        y+l/2+w/2+h+5
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l+5,
+
+        y+l/2+h+5
+
+    );
+
+
+    ctx.lineTo(
+
+        x+5,
+
+        y+h+5
+
+    );
+
 
     ctx.closePath();
 
     ctx.fill();
 
 
-    // ===========================
+
+
+
+    // =========================
     // Oberseite
-    // ===========================
+    // =========================
 
-    ctx.fillStyle = COLORS.boxTop;
 
-    ctx.strokeStyle = COLORS.boxBorder;
+    ctx.fillStyle =
+        COLORS.boxTop;
 
-    ctx.lineWidth = 1;
+
+    ctx.strokeStyle =
+        COLORS.boxBorder;
+
 
     ctx.beginPath();
 
-    ctx.moveTo(x,y);
-
-    ctx.lineTo(x+l,y+l/2);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2);
-
-    ctx.lineTo(x-w,y+w/2);
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
-
-
-    // ===========================
-    // Vorderseite
-    // ===========================
-
-    ctx.fillStyle = COLORS.boxFront;
-
-    ctx.beginPath();
-
-    ctx.moveTo(x-w,y+w/2);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2+h);
-
-    ctx.lineTo(x-w,y+w/2+h);
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
-
-
-    // ===========================
-    // Rechte Seite
-    // ===========================
-
-    ctx.fillStyle = COLORS.boxSide;
-
-    ctx.beginPath();
-
-    ctx.moveTo(x+l,y+l/2);
-
-    ctx.lineTo(x+l,y+l/2+h);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2+h);
-
-    ctx.lineTo(x+l-w,y+l/2+w/2);
-
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.stroke();
-
-
-    // ===========================
-    // Klebeband oben
-    // ===========================
-
-    ctx.strokeStyle="#9A8765";
-
-    ctx.lineWidth=1;
-
-    ctx.beginPath();
 
     ctx.moveTo(
-        x-w/2,
-        y+w/4
-    );
-
-    ctx.lineTo(
-        x+l-w/2,
-        y+l/2+w/4
-    );
-
-    ctx.moveTo(
-        x+l/2,
-        y+l/4
-    );
-
-    ctx.lineTo(
-        x+l/2-w,
-        y+l/4+w/2
-    );
-
-    ctx.stroke();
-
-
-    // ===========================
-    // Drehung markieren
-    // ===========================
-
-    if(rotation===90){
-
-        ctx.strokeStyle="#d32f2f";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x-w/2,
-            y+w/4
-        );
-
-        ctx.lineTo(
-            x+l/2,
-            y+l/4
-        );
-
-        ctx.stroke();
-
-    }
-
-}
-/* ===========================================
-   Hilfsfunktionen
-=========================================== */
-
-function drawDirectionArrow(ctx, x, y, w, h, rotation) {
-
-    ctx.save();
-
-    ctx.strokeStyle = "#1E88E5";
-    ctx.fillStyle = "#1E88E5";
-    ctx.lineWidth = 1.5;
-
-    ctx.beginPath();
-
-    if (rotation === 90) {
-
-        const cx = x + w / 2;
-
-        ctx.moveTo(cx, y + 6);
-        ctx.lineTo(cx, y + h - 10);
-
-        ctx.lineTo(cx - 4, y + h - 16);
-
-        ctx.moveTo(cx, y + h - 10);
-
-        ctx.lineTo(cx + 4, y + h - 16);
-
-    } else {
-
-        const cy = y + h / 2;
-
-        ctx.moveTo(x + 6, cy);
-        ctx.lineTo(x + w - 10, cy);
-
-        ctx.lineTo(x + w - 16, cy - 4);
-
-        ctx.moveTo(x + w - 10, cy);
-
-        ctx.lineTo(x + w - 16, cy + 4);
-
-    }
-
-    ctx.stroke();
-
-    ctx.restore();
-
-}
-
-
-/* ===========================================
-   Kartonnummer
-=========================================== */
-
-function drawBoxNumber(ctx, x, y, number) {
-
-    ctx.save();
-
-    ctx.fillStyle = "#37474F";
-
-    ctx.font = "11px Inter";
-
-    ctx.textAlign = "center";
-
-    ctx.fillText(
-
-        number,
 
         x,
 
@@ -904,204 +682,786 @@ function drawBoxNumber(ctx, x, y, number) {
 
     );
 
-    ctx.restore();
 
-}
+    ctx.lineTo(
+
+        x+l,
+
+        y+l/2
+
+    );
 
 
-/* ===========================================
-   Maßlinie
-=========================================== */
+    ctx.lineTo(
 
-function drawDimension(ctx, x1, y1, x2, y2, text) {
+        x+l-w,
 
-    ctx.save();
+        y+l/2+w/2
 
-    ctx.strokeStyle = "#616161";
+    );
 
-    ctx.lineWidth = 1;
 
-    ctx.beginPath();
+    ctx.lineTo(
 
-    ctx.moveTo(x1, y1);
+        x-w,
 
-    ctx.lineTo(x2, y2);
+        y+w/2
+
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
 
     ctx.stroke();
 
-    ctx.fillStyle = "#424242";
 
-    ctx.font = "12px Inter";
 
-    ctx.textAlign = "center";
 
-    ctx.fillText(
 
-        text,
+    // =========================
+    // Vorderseite
+    // =========================
 
-        (x1 + x2) / 2,
 
-        (y1 + y2) / 2 - 6
+    ctx.fillStyle =
+        COLORS.boxFront;
+
+
+
+    ctx.beginPath();
+
+
+
+    ctx.moveTo(
+
+        x-w,
+
+        y+w/2
 
     );
 
-    ctx.restore();
 
-}
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2
+
+    );
 
 
-/* ===========================================
-   Raster
-=========================================== */
+    ctx.lineTo(
 
-function drawGrid(ctx) {
+        x+l-w,
 
-    const size = 25;
+        y+l/2+w/2+h
 
-    ctx.save();
+    );
 
-    ctx.strokeStyle = "#ECEFF1";
+
+    ctx.lineTo(
+
+        x-w,
+
+        y+w/2+h
+
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+
+
+    // =========================
+    // Rechte Seite
+    // =========================
+
+
+    ctx.fillStyle =
+        COLORS.boxSide;
+
+
+
+    ctx.beginPath();
+
+
+
+    ctx.moveTo(
+
+        x+l,
+
+        y+l/2
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l,
+
+        y+l/2+h
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2+h
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2
+
+    );
+
+
+    ctx.closePath();
+
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+
+
+
+    // =========================
+    // Klebeband
+    // =========================
+
+
+    ctx.strokeStyle =
+        "#8d7658";
+
 
     ctx.lineWidth = 1;
 
-    for (let x = 0; x < ctx.canvas.width; x += size) {
 
-        ctx.beginPath();
 
-        ctx.moveTo(x, 0);
+    ctx.beginPath();
 
-        ctx.lineTo(x, ctx.canvas.height);
 
-        ctx.stroke();
+
+    if(rotation===180){
+
+
+        // gedrehte Lage
+
+        ctx.moveTo(
+
+            x+l/2,
+
+            y+l/4
+
+        );
+
+
+        ctx.lineTo(
+
+            x+l/2-w,
+
+            y+l/4+w/2
+
+        );
+
 
     }
 
-    for (let y = 0; y < ctx.canvas.height; y += size) {
+    else{
 
-        ctx.beginPath();
 
-        ctx.moveTo(0, y);
+        // normale Lage
 
-        ctx.lineTo(ctx.canvas.width, y);
 
-        ctx.stroke();
+        ctx.moveTo(
+
+            x-w/2,
+
+            y+w/4
+
+        );
+
+
+        ctx.lineTo(
+
+            x+l-w/2,
+
+            y+l/2+w/4
+
+        );
+
 
     }
 
-    ctx.restore();
+
+
+    ctx.stroke();
+
+
+
+
+
+    // Richtungspfeil
+
+    ctx.strokeStyle =
+        "#1976D2";
+
+
+    ctx.lineWidth = 2;
+
+
+
+    ctx.beginPath();
+
+
+
+    if(rotation===180){
+
+
+        ctx.moveTo(
+
+            x+l-20,
+
+            y+l/2
+
+        );
+
+
+        ctx.lineTo(
+
+            x+20,
+
+            y+10
+
+        );
+
+
+    }
+
+    else{
+
+
+        ctx.moveTo(
+
+            x+20,
+
+            y+10
+
+        );
+
+
+        ctx.lineTo(
+
+            x+l-20,
+
+            y+l/2
+
+        );
+
+
+    }
+
+
+
+    ctx.stroke();
+
+
 
 }
-/* ===========================================
-   Europalette Details
-=========================================== */
+// =======================================
+// 3D Europalette
+// =======================================
 
-function drawPalletBlocks(ctx,x,y,l,w){
 
-    const blockColor="#8D633B";
+function drawIsoPallet(
 
-    const blockWidth=18;
+    ctx,
 
-    const blockHeight=12;
+    x,
 
-    const rows=[0.12,0.48,0.84];
+    y,
 
-    const cols=[0.10,0.45,0.80];
+    l,
 
-    ctx.fillStyle=blockColor;
+    w
 
-    rows.forEach(r=>{
+){
 
-        cols.forEach(c=>{
 
-            ctx.fillRect(
+    const h = 25;
 
-                x+l*c,
 
-                y+w*r,
 
-                blockWidth,
+    // Schatten unter Palette
 
-                blockHeight
+    ctx.fillStyle =
+        "rgba(0,0,0,0.18)";
 
-            );
 
-        });
+
+    ctx.beginPath();
+
+
+
+    ctx.moveTo(
+
+        x-w,
+
+        y+w/2+h+10
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2+h+10
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l,
+
+        y+l/2+h+10
+
+    );
+
+
+    ctx.lineTo(
+
+        x,
+
+        y+10
+
+    );
+
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+
+
+
+    // =========================
+    // Palettenoberseite
+    // =========================
+
+
+    ctx.fillStyle =
+        COLORS.palletTop;
+
+
+    ctx.strokeStyle =
+        COLORS.palletDark;
+
+
+
+    ctx.lineWidth = 2;
+
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+
+        x,
+
+        y
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l,
+
+        y+l/2
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2
+
+    );
+
+
+    ctx.lineTo(
+
+        x-w,
+
+        y+w/2
+
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+
+
+
+    // =========================
+    // Vorderseite Palette
+    // =========================
+
+
+    ctx.fillStyle =
+        COLORS.palletSide;
+
+
+
+    ctx.beginPath();
+
+
+
+    ctx.moveTo(
+
+        x-w,
+
+        y+w/2
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2+h
+
+    );
+
+
+    ctx.lineTo(
+
+        x-w,
+
+        y+w/2+h
+
+    );
+
+
+    ctx.closePath();
+
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+
+
+
+    // =========================
+    // Rechte Seite
+    // =========================
+
+
+    ctx.fillStyle =
+        COLORS.palletDark;
+
+
+
+    ctx.beginPath();
+
+
+
+    ctx.moveTo(
+
+        x+l,
+
+        y+l/2
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l,
+
+        y+l/2+h
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2+h
+
+    );
+
+
+    ctx.lineTo(
+
+        x+l-w,
+
+        y+l/2+w/2
+
+    );
+
+
+    ctx.closePath();
+
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+
+
+
+    // Bretter
+
+    drawPalletBoards(
+
+        ctx,
+
+        x,
+
+        y,
+
+        l,
+
+        w
+
+    );
+
+
+
+    // Klötze
+
+    drawPalletBlocks(
+
+        ctx,
+
+        x,
+
+        y,
+
+        l,
+
+        w
+
+    );
+
+
+}
+
+
+
+
+
+// =======================================
+// Paletten Bretter
+// =======================================
+
+
+function drawPalletBoards(
+
+    ctx,
+
+    x,
+
+    y,
+
+    l,
+
+    w
+
+){
+
+
+    ctx.strokeStyle =
+        "#A97943";
+
+
+    ctx.lineWidth = 2;
+
+
+
+    for(let i=1;i<5;i++){
+
+
+        const offset =
+            i*(w/5);
+
+
+
+        ctx.beginPath();
+
+
+
+        ctx.moveTo(
+
+            x-offset,
+
+            y+offset/2
+
+        );
+
+
+
+        ctx.lineTo(
+
+            x+l-offset,
+
+            y+l/2+offset/2
+
+        );
+
+
+
+        ctx.stroke();
+
+
+    }
+
+
+}
+
+
+
+
+
+// =======================================
+// Palettenklötze
+// =======================================
+
+
+function drawPalletBlocks(
+
+    ctx,
+
+    x,
+
+    y,
+
+    l,
+
+    w
+
+){
+
+
+    ctx.fillStyle =
+        COLORS.palletDark;
+
+
+
+    const positions=[
+
+
+        [0.1,0.1],
+
+        [0.45,0.1],
+
+        [0.8,0.1],
+
+
+        [0.1,0.7],
+
+        [0.45,0.7],
+
+        [0.8,0.7]
+
+
+    ];
+
+
+
+    positions.forEach(p=>{
+
+
+        ctx.fillRect(
+
+
+            x+l*p[0],
+
+
+            y+w*p[1],
+
+
+            18,
+
+            12
+
+
+        );
+
 
     });
 
-}
-
-
-/* ===========================================
-   Palette Bretter
-=========================================== */
-
-function drawPalletBoards(ctx,x,y,l,w){
-
-    ctx.strokeStyle="#B8894D";
-
-    ctx.lineWidth=2;
-
-    const boards=5;
-
-    const step=w/boards;
-
-    for(let i=1;i<boards;i++){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x,
-            y+i*step
-        );
-
-        ctx.lineTo(
-            x+l,
-            y+i*step
-        );
-
-        ctx.stroke();
-
-    }
 
 }
 
 
-/* ===========================================
-   Canvas Hintergrund
-=========================================== */
+
+
+
+// =======================================
+// Hintergrund
+// =======================================
+
 
 function drawBackground(ctx){
 
-    const g=ctx.createLinearGradient(
 
-        0,
+    ctx.fillStyle =
+        COLORS.background;
 
-        0,
 
-        0,
-
-        ctx.canvas.height
-
-    );
-
-    g.addColorStop(
-
-        0,
-
-        "#ffffff"
-
-    );
-
-    g.addColorStop(
-
-        1,
-
-        "#eef3f8"
-
-    );
-
-    ctx.fillStyle=g;
 
     ctx.fillRect(
 
@@ -1115,89 +1475,5 @@ function drawBackground(ctx){
 
     );
 
-}
-
-
-/* ===========================================
-   Titel
-=========================================== */
-
-function drawTitle(ctx,text){
-
-    ctx.save();
-
-    ctx.fillStyle="#37474F";
-
-    ctx.font="bold 22px Inter";
-
-    ctx.fillText(
-
-        text,
-
-        35,
-
-        35
-
-    );
-
-    ctx.restore();
 
 }
-
-
-/* ===========================================
-   Legende
-=========================================== */
-
-function drawLegend(ctx){
-
-    ctx.save();
-
-    const x=20;
-
-    let y=60;
-
-    ctx.font="13px Inter";
-
-    ctx.fillStyle="#37474F";
-
-    ctx.fillText("Legende",x,y);
-
-    y+=20;
-
-    ctx.fillStyle=COLORS.boxTop;
-
-    ctx.fillRect(x,y,16,16);
-
-    ctx.strokeRect(x,y,16,16);
-
-    ctx.fillStyle="#37474F";
-
-    ctx.fillText("Karton",x+24,y+13);
-
-    y+=24;
-
-    ctx.fillStyle=COLORS.palletTop;
-
-    ctx.fillRect(x,y,16,16);
-
-    ctx.strokeRect(x,y,16,16);
-
-    ctx.fillStyle="#37474F";
-
-    ctx.fillText("Palette",x+24,y+13);
-
-    ctx.restore();
-
-}
-
-
-/* ===========================================
-   Ende Canvas Engine
-=========================================== */
-
-console.log(
-
-    "Canvas Engine Version 3.0 geladen"
-
-);
