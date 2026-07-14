@@ -2,11 +2,10 @@
 ==================================================
  Europal Optimizer Pro
  optimizer.js
- Version 1.0
- Wechsel-Lagen System
+ Pattern Layer System
+ Version 3.0
 ==================================================
 */
-
 
 
 function optimize(job){
@@ -15,13 +14,13 @@ function optimize(job){
     const result = {
 
 
-        boxes: [],
+        boxes:[],
 
 
-        layers: 0,
+        layers:0,
 
 
-        totalCartons: 0
+        totalCartons:0
 
 
     };
@@ -30,10 +29,7 @@ function optimize(job){
 
 
 
-
-
-    const layers = Math.floor(
-
+    const maxLayers = Math.floor(
 
 
         (
@@ -49,16 +45,46 @@ function optimize(job){
         job.box.height
 
 
-
     );
 
 
 
 
 
+    result.layers = maxLayers;
 
 
-    result.layers = layers;
+
+
+
+
+
+    const patternA =
+
+        createBestPattern(
+
+            job,
+
+            false
+
+        );
+
+
+
+
+
+
+
+    const patternB =
+
+        createBestPattern(
+
+            job,
+
+            true
+
+        );
+
 
 
 
@@ -69,9 +95,9 @@ function optimize(job){
 
     for(
 
-        let layer = 1;
+        let layer=1;
 
-        layer <= layers;
+        layer<=maxLayers;
 
         layer++
 
@@ -79,7 +105,7 @@ function optimize(job){
 
 
 
-        let boxes;
+        let pattern;
 
 
 
@@ -95,13 +121,7 @@ function optimize(job){
 
 
 
-            boxes = createPatternA(
-
-                job,
-
-                layer
-
-            );
+            pattern = patternA;
 
 
 
@@ -111,13 +131,7 @@ function optimize(job){
 
 
 
-            boxes = createPatternB(
-
-                job,
-
-                layer
-
-            );
+            pattern = patternB;
 
 
 
@@ -131,14 +145,21 @@ function optimize(job){
 
         result.boxes.push(
 
-            ...boxes
+            ...createLayer(
+
+                pattern,
+
+                layer,
+
+                job
+
+            )
 
         );
 
 
 
     }
-
 
 
 
@@ -166,39 +187,188 @@ function optimize(job){
 
 }
 
-
-
-
-
-
+/*
+==================================================
+ optimizer.js
+ Teil 2
+ Muster Berechnung
+==================================================
+*/
 
 
 
 // ======================================
-// Muster A
-// Lage 1,3,5
+// Bestes Lagenmuster finden
 // ======================================
 
 
-function createPatternA(
+function createBestPattern(
 
     job,
 
-    layer
+    rotated
 
 ){
 
 
 
-    return packLayer(
+    const palletLength =
 
-        job,
+        job.pallet.length;
 
-        layer,
 
-        false
+
+    const palletWidth =
+
+        job.pallet.width;
+
+
+
+
+
+
+
+    let boxLength;
+
+    let boxWidth;
+
+
+
+
+
+
+
+    if(rotated){
+
+
+
+        boxLength =
+
+            job.box.width;
+
+
+
+        boxWidth =
+
+            job.box.length;
+
+
+
+    }
+
+    else{
+
+
+
+        boxLength =
+
+            job.box.length;
+
+
+
+        boxWidth =
+
+            job.box.width;
+
+
+
+    }
+
+
+
+
+
+
+
+
+    const columns = Math.floor(
+
+
+
+        palletLength /
+
+        boxLength
+
+
 
     );
+
+
+
+
+
+
+
+
+    const rows = Math.floor(
+
+
+
+        palletWidth /
+
+        boxWidth
+
+
+
+    );
+
+
+
+
+
+
+
+
+    const count =
+
+
+
+        columns *
+
+        rows;
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        columns,
+
+
+
+        rows,
+
+
+
+        count,
+
+
+
+        length:
+
+        boxLength,
+
+
+
+        width:
+
+        boxWidth,
+
+
+
+        rotation:
+
+        rotated ? 90 : 0
+
+
+
+    };
 
 
 
@@ -213,55 +383,128 @@ function createPatternA(
 
 
 // ======================================
-// Muster B
-// Lage 2,4,6
+// Vergleich zweier Muster
 // ======================================
 
 
-function createPatternB(
+function comparePatterns(
 
-    job,
+    a,
 
-    layer
+    b
 
 ){
 
 
 
-    return packLayer(
+    if(
 
-        job,
+        a.count >
 
-        layer,
+        b.count
 
-        true
+    ){
 
-    );
+
+
+        return a;
+
+
+
+    }
+
+
+
+
+
+
+
+    if(
+
+        b.count >
+
+        a.count
+
+    ){
+
+
+
+        return b;
+
+
+
+    }
+
+
+
+
+
+
+
+    // gleiche Anzahl:
+    // bessere Flächennutzung
+
+
+
+    const areaA =
+
+        a.columns *
+
+        a.length *
+
+        a.rows *
+
+        a.width;
+
+
+
+
+
+
+
+    const areaB =
+
+        b.columns *
+
+        b.length *
+
+        b.rows *
+
+        b.width;
+
+
+
+
+
+
+
+    return areaA >= areaB ? a : b;
 
 
 
 }
-
-
-
-
-
-
+/*
+==================================================
+ optimizer.js
+ Teil 3
+ Lage erzeugen
+==================================================
+*/
 
 
 
 // ======================================
-// Eine Lage packen
+// Eine komplette Lage erzeugen
 // ======================================
 
 
-function packLayer(
+function createLayer(
 
-    job,
+    pattern,
 
     layer,
 
-    rotateFirst
+    job
 
 ){
 
@@ -271,211 +514,103 @@ function packLayer(
 
 
 
-    const free = [];
 
 
 
 
+    for(
 
+        let row = 0;
 
+        row < pattern.rows;
 
-    free.push({
-
-
-
-        x:0,
-
-        y:0,
-
-
-
-        width:
-
-        job.pallet.length,
-
-
-
-        height:
-
-        job.pallet.width
-
-
-
-    });
-
-
-
-
-
-
-
-
-
-    while(
-
-        free.length > 0
+        row++
 
     ){
 
 
 
-        free.sort((a,b)=>{
+        for(
 
+            let col = 0;
 
+            col < pattern.columns;
 
-            return (
-
-                b.width *
-
-                b.height
-
-            )
-
-            -
-
-            (
-
-                a.width *
-
-                a.height
-
-            );
-
-
-
-        });
-
-
-
-
-
-
-
-        const area =
-
-            free.shift();
-
-
-
-
-
-
-
-        const placement =
-
-            findPosition(
-
-                area,
-
-                job.box,
-
-                rotateFirst
-
-            );
-
-
-
-
-
-
-
-        if(
-
-            !placement
+            col++
 
         ){
 
 
 
-            continue;
+            boxes.push({
+
+
+
+                x:
+
+                col *
+
+                pattern.length,
+
+
+
+                y:
+
+                row *
+
+                pattern.width,
+
+
+
+                z:
+
+                (
+
+                    layer - 1
+
+                )
+
+                *
+
+                job.box.height,
+
+
+
+                length:
+
+                pattern.length,
+
+
+
+                width:
+
+                pattern.width,
+
+
+
+                height:
+
+                job.box.height,
+
+
+
+                rotation:
+
+                pattern.rotation,
+
+
+
+                layer:
+
+                layer
+
+
+
+            });
+
+
 
         }
-
-
-
-
-
-
-
-        boxes.push({
-
-
-
-            x:
-
-            area.x,
-
-
-
-            y:
-
-            area.y,
-
-
-
-            z:
-
-            (
-
-                layer-1
-
-            )
-
-            *
-
-            job.box.height,
-
-
-
-            length:
-
-            placement.length,
-
-
-
-            width:
-
-            placement.width,
-
-
-
-            height:
-
-            job.box.height,
-
-
-
-            rotation:
-
-            placement.rotation,
-
-
-
-            layer:
-
-            layer
-
-
-
-        });
-
-
-
-
-
-
-
-        splitFree(
-
-            free,
-
-            area,
-
-            placement.length,
-
-            placement.width
-
-        );
 
 
 
@@ -502,180 +637,43 @@ function packLayer(
 
 
 // ======================================
-// beste Drehung finden
+// Flächenberechnung
 // ======================================
 
 
-function findPosition(
+function calculateLayerArea(
 
-    area,
-
-    box,
-
-    rotateFirst
+    pattern
 
 ){
 
 
 
-    const options = [];
+    return (
 
 
 
+        pattern.columns *
 
+        pattern.length
 
 
 
-    if(
+    )
 
+    *
 
+    (
 
-        box.length <= area.width
 
-        &&
 
-        box.width <= area.height
+        pattern.rows *
 
+        pattern.width
 
 
-    ){
 
-
-
-        options.push({
-
-
-
-            length:
-
-            box.length,
-
-
-
-            width:
-
-            box.width,
-
-
-
-            rotation:
-
-            0
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-
-
-    if(
-
-
-
-        box.width <= area.width
-
-        &&
-
-        box.length <= area.height
-
-
-
-    ){
-
-
-
-        options.push({
-
-
-
-            length:
-
-            box.width,
-
-
-
-            width:
-
-            box.length,
-
-
-
-            rotation:
-
-            90
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-
-    if(
-
-        options.length === 0
-
-    ){
-
-
-
-        return null;
-
-
-
-    }
-
-
-
-
-
-
-
-    if(
-
-        rotateFirst
-
-    ){
-
-
-
-        options.sort((a,b)=>{
-
-
-
-            return b.rotation-a.rotation;
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-
-    return options[0];
+    );
 
 
 
@@ -690,53 +688,21 @@ function findPosition(
 
 
 // ======================================
-// Freifläche teilen
+// Auslastung
 // ======================================
 
 
-function splitFree(
+function calculateUtilization(
 
-    free,
+    boxes,
 
-    area,
-
-    length,
-
-    width
+    pallet
 
 ){
 
 
 
-    const right = {
-
-
-
-        x:
-
-        area.x+length,
-
-
-
-        y:
-
-        area.y,
-
-
-
-        width:
-
-        area.width-length,
-
-
-
-        height:
-
-        width
-
-
-
-    };
+    let used = 0;
 
 
 
@@ -744,35 +710,19 @@ function splitFree(
 
 
 
-    const bottom = {
+    boxes.forEach(box=>{
 
 
 
-        x:
+        used +=
 
-        area.x,
+        box.length *
 
-
-
-        y:
-
-        area.y+width,
+        box.width;
 
 
 
-        width:
-
-        area.width,
-
-
-
-        height:
-
-        area.height-width
-
-
-
-    };
+    });
 
 
 
@@ -780,56 +730,351 @@ function splitFree(
 
 
 
-    if(
-
-        right.width>0
-
-        &&
-
-        right.height>0
-
-    ){
+    const max =
 
 
 
-        free.push(
+        pallet.length *
 
-            right
+        pallet.width *
+
+        (
+
+            Math.max(
+
+                ...boxes.map(
+
+                    b=>b.layer
+
+                )
+
+            )
 
         );
 
 
 
-    }
 
 
 
 
+    return (
 
+        used /
 
+        max *
 
-    if(
+        100
 
-        bottom.width>0
-
-        &&
-
-        bottom.height>0
-
-    ){
-
-
-
-        free.push(
-
-            bottom
-
-        );
-
-
-
-    }
+    ).toFixed(1);
 
 
 
 }
+/*
+==================================================
+ optimizer.js
+ Teil 4
+ Abschluss
+==================================================
+*/
+
+
+
+// ======================================
+// Ergebnis prüfen
+// ======================================
+
+
+function validateBoxes(
+
+    boxes,
+
+    pallet
+
+){
+
+
+
+    return boxes.filter(box=>{
+
+
+
+        return (
+
+
+
+            box.x +
+
+            box.length
+
+            <=
+
+            pallet.length
+
+
+
+            &&
+
+
+
+            box.y +
+
+            box.width
+
+            <=
+
+            pallet.width
+
+
+
+        );
+
+
+
+    });
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Restfläche bewerten
+// ======================================
+
+
+function calculateFreeSpace(
+
+    pattern,
+
+    pallet
+
+){
+
+
+
+    const used =
+
+
+
+        pattern.columns *
+
+        pattern.length *
+
+        pattern.rows *
+
+        pattern.width;
+
+
+
+
+
+
+
+    const total =
+
+
+
+        pallet.length *
+
+        pallet.width;
+
+
+
+
+
+
+
+    return total - used;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Muster Auswahl
+// ======================================
+
+
+function getBestPattern(
+
+    job
+
+){
+
+
+
+    const normal =
+
+        createBestPattern(
+
+            job,
+
+            false
+
+        );
+
+
+
+
+
+
+
+    const rotated =
+
+        createBestPattern(
+
+            job,
+
+            true
+
+        );
+
+
+
+
+
+
+
+    return comparePatterns(
+
+        normal,
+
+        rotated
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================
+// Debug Ausgabe
+// ======================================
+
+
+function debugOptimizer(
+
+    result
+
+){
+
+
+
+    console.log(
+
+        "=========================="
+
+    );
+
+
+
+    console.log(
+
+        "Europal Optimizer"
+
+    );
+
+
+
+    console.log(
+
+        "Kartons:",
+
+        result.totalCartons
+
+    );
+
+
+
+    console.log(
+
+        "Lagen:",
+
+        result.layers
+
+    );
+
+
+
+    console.log(
+
+        result.boxes.map(
+
+            box=>({
+
+
+                layer:
+
+                box.layer,
+
+
+                x:
+
+                box.x,
+
+
+                y:
+
+                box.y,
+
+
+                rotation:
+
+                box.rotation
+
+
+
+            })
+
+        )
+
+    );
+
+
+
+    console.log(
+
+        "=========================="
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+console.log(
+
+    "Optimizer Pattern System geladen"
+
+);
