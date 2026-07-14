@@ -16,11 +16,12 @@ function optimize(job){
 
         createOptimizedStack(job);
 
+return finalizeVariant(
+    variant,
+    job
+);
 
-
-    return [
-
-        variant
+ 
 
     ];
 
