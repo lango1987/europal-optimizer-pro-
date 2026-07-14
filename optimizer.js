@@ -2,7 +2,8 @@
 ==================================================
  Europal Optimizer Pro
  Optimizer
- Version 1.0
+ Version 3.0
+ 180 Grad Wechsellagen
 ==================================================
 */
 
@@ -24,7 +25,9 @@ function optimize(job){
             );
 
 
-        if(result.totalCartons > 0){
+        if(
+            result.totalCartons > 0
+        ){
 
             variants.push(result);
 
@@ -36,30 +39,40 @@ function optimize(job){
 
 
 
+
     variants.sort((a,b)=>{
 
 
+        // Stabilste Variante zuerst
+
         if(
-            b.cartonsPerLayer !==
-            a.cartonsPerLayer
+            b.stability !== a.stability
         ){
 
             return (
-                b.cartonsPerLayer -
-                a.cartonsPerLayer
+                b.stability -
+                a.stability
             );
 
         }
 
 
 
+        // Danach Anzahl Kartons
+
         return (
-            b.utilization -
-            a.utilization
+
+            b.cartonsPerLayer -
+
+            a.cartonsPerLayer
+
         );
 
 
+
     });
+
+
 
 
 
@@ -72,12 +85,20 @@ function optimize(job){
 
 
 
-// =====================================
-// Muster berechnen
-// =====================================
 
 
-function calculatePattern(job,pattern){
+// ======================================
+// Berechnung einer Variante
+// ======================================
+
+
+function calculatePattern(
+
+    job,
+
+    pattern
+
+){
 
 
 
@@ -92,7 +113,10 @@ function calculatePattern(job,pattern){
 
 
 
-    if(pattern.rotation === 90){
+
+    if(
+        pattern.rotation === 90
+    ){
 
 
         boxLength =
@@ -109,21 +133,25 @@ function calculatePattern(job,pattern){
 
 
 
-    const cols = Math.floor(
+    const cols =
+        Math.floor(
 
-        job.pallet.length /
-        boxLength
+            job.pallet.length /
+            boxLength
 
-    );
+        );
 
 
 
-    const rows = Math.floor(
+    const rows =
+        Math.floor(
 
-        job.pallet.width /
-        boxWidth
+            job.pallet.width /
+            boxWidth
 
-    );
+        );
+
+
 
 
 
@@ -133,42 +161,53 @@ function calculatePattern(job,pattern){
 
 
 
-    const layers = Math.floor(
 
-        (
-            job.settings.maxHeight -
-            job.pallet.height
+    const layers =
+        Math.floor(
 
-        )
-        /
-        job.box.height
+            (
+                job.settings.maxHeight -
+                job.pallet.height
 
-    );
+            )
+            /
+            job.box.height
+
+        );
+
 
 
 
 
     const totalCartons =
+
         cartonsPerLayer *
         layers;
 
 
 
 
+
     const palletArea =
+
         job.pallet.length *
         job.pallet.width;
 
 
 
+
     const usedArea =
+
         cartonsPerLayer *
         boxLength *
         boxWidth;
 
 
 
+
+
     const utilization =
+
         Number(
 
             (
@@ -185,32 +224,45 @@ function calculatePattern(job,pattern){
 
 
 
+
+
     return {
 
 
+
         id:
+
             pattern.id,
 
 
+
         name:
+
             pattern.name,
 
 
+
         stability:
+
             pattern.stability,
+
 
 
         cols,
 
         rows,
 
+
         layers,
+
 
 
         cartonsPerLayer,
 
 
+
         totalCartons,
+
 
 
         utilization,
@@ -220,15 +272,20 @@ function calculatePattern(job,pattern){
         boxLength,
 
 
+
         boxWidth,
 
 
+
         boxHeight:
+
             job.box.height,
 
 
 
+
         boxes:
+
 
             createBoxes(
 
@@ -242,14 +299,14 @@ function calculatePattern(job,pattern){
 
                 boxWidth,
 
-                job.box.height,
-
-                pattern.rotation
+                job.box.height
 
             )
 
 
+
     };
+
 
 }
 
@@ -258,9 +315,12 @@ function calculatePattern(job,pattern){
 
 
 
-// =====================================
+
+
+
+// ======================================
 // Kartons erzeugen
-// =====================================
+// ======================================
 
 
 function createBoxes(
@@ -275,61 +335,119 @@ function createBoxes(
 
     boxWidth,
 
-    boxHeight,
-
-    rotation
+    boxHeight
 
 ){
 
 
-    const boxes=[];
+
+    const boxes = [];
+
+
+
 
 
 
 
     for(
-        let layer=0;
-        layer<layers;
+
+        let layer = 0;
+
+        layer < layers;
+
         layer++
+
     ){
 
 
 
+
+
         for(
-            let row=0;
-            row<rows;
+
+            let row = 0;
+
+            row < rows;
+
             row++
+
         ){
 
 
 
+
+
             for(
-                let col=0;
-                col<cols;
+
+                let col = 0;
+
+                col < cols;
+
                 col++
+
             ){
 
 
 
+
+
                 let x;
+
                 let y;
 
-                let currentRotation=0;
+                let rotation;
 
 
 
 
-                // Jede zweite Lage drehen
+
+
+
+                // ==========================
+                // Gerade Lage
+                // ==========================
+
 
                 if(
-                    rotation==="alternate"
-                    &&
-                    layer % 2 === 1
+                    layer % 2 === 0
                 ){
 
 
 
                     x =
+
+                        col *
+                        boxLength;
+
+
+
+                    y =
+
+                        row *
+                        boxWidth;
+
+
+
+                    rotation = 0;
+
+
+
+                }
+
+
+
+
+                // ==========================
+                // Ungerade Lage 180 Grad
+                // ==========================
+
+
+                else {
+
+
+
+                    x =
+
                     (
                         cols -
                         1 -
@@ -341,7 +459,9 @@ function createBoxes(
 
 
 
+
                     y =
+
                     (
                         rows -
                         1 -
@@ -353,31 +473,15 @@ function createBoxes(
 
 
 
-                    currentRotation=180;
+
+                    rotation = 180;
 
 
 
                 }
 
-                else{
 
 
-                    x =
-                    col *
-                    boxLength;
-
-
-
-                    y =
-                    row *
-                    boxWidth;
-
-
-
-                    currentRotation=0;
-
-
-                }
 
 
 
@@ -386,48 +490,67 @@ function createBoxes(
                 boxes.push({
 
 
+
                     x:x,
 
 
                     y:y,
 
 
+
                     z:
+
                     layer *
                     boxHeight,
 
 
 
                     length:
+
                     boxLength,
 
 
+
                     width:
+
                     boxWidth,
 
 
+
                     height:
+
                     boxHeight,
 
 
 
                     rotation:
-                    currentRotation,
+
+                    rotation,
 
 
 
                     layer:
-                    layer+1
+
+                    layer + 1
+
 
 
                 });
 
 
 
+
+
             }
 
 
+
+
+
         }
+
+
+
 
 
     }
@@ -435,7 +558,11 @@ function createBoxes(
 
 
 
+
+
+
     return boxes;
+
 
 
 }
