@@ -2,36 +2,48 @@
 ==================================================
  Europal Optimizer Pro
  Config
- Version 2.0
+ Version 1.0
 ==================================================
 */
 
+
 const SETTINGS = {
+
 
     defaultMaxHeight: 1800,
 
+
     canvas: {
 
-        margin: 40,
+        margin: 50,
 
-        background: "#f5f7fa"
+        background: "#f4f6f8"
 
     },
 
+
     iso: {
 
-        scale: 0.18,
+        scale: 0.22,
 
-        startX: 260,
+        startX: 450,
 
-        startY: 520
+        startY: 500
 
     }
 
 };
 
 
+
+
+// ======================================
+// Paletten
+// ======================================
+
+
 const PALLETS = {
+
 
     euro: {
 
@@ -66,27 +78,53 @@ const PALLETS = {
 
     }
 
+
 };
+
+
+
+
+// ======================================
+// Farben
+// ======================================
 
 
 const COLORS = {
 
-    background: "#f5f7fa",
 
-    palletTop: "#D7B37A",
+    background:
+        "#f4f6f8",
 
-    palletSide: "#B98954",
 
-    palletDark: "#8D633B",
+    palletTop:
+        "#d8b27c",
 
-    boxTop: "#D9C6A3",
 
-    boxFront: "#C7AE84",
+    palletSide:
+        "#b8874f",
 
-    boxSide: "#B69568",
 
-    boxBorder: "#6D573B",
+    palletDark:
+        "#8a5d32",
 
-    shadow: "rgba(0,0,0,0.12)"
+
+    boxTop:
+        "#d9c39b",
+
+
+    boxFront:
+        "#c7aa7a",
+
+
+    boxSide:
+        "#ae8b5c",
+
+
+    boxBorder:
+        "#6d5233",
+
+
+    shadow:
+        "rgba(0,0,0,0.15)"
 
 };
