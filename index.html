@@ -1,1 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
 
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Europal Optimizer Pro</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>📦 Europal Optimizer Pro</h1>
+
+    </header>
+
+    <main>
+
+        <aside id="sidebar">
+
+            <h2>Berechnung</h2>
+
+            <label>Kartonlänge (mm)</label>
+            <input id="length" type="number">
+
+            <label>Kartonbreite (mm)</label>
+            <input id="width" type="number">
+
+            <label>Kartonhöhe (mm)</label>
+            <input id="height" type="number">
+
+            <label>Gewicht (kg)</label>
+            <input id="weight" type="number">
+
+            <label>Maximale Stapelhöhe (mm)</label>
+            <input id="maxHeight" type="number" value="1800">
+
+            <button id="calculate">
+
+                Optimieren
+
+            </button>
+
+        </aside>
+
+        <section id="workspace">
+
+            <section id="dashboard">
+
+                <div class="card">
+
+                    <h3>Kartons/Lage</h3>
+
+                    <p id="layer">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Lagen</h3>
+
+                    <p id="layers">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Gesamtkartons</h3>
+
+                    <p id="total">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Auslastung</h3>
+
+                    <p id="utilization">0 %</p>
+
+                </div>
+
+            </section>
+
+            <section id="canvasArea">
+
+                <canvas id="canvas" width="1100" height="700"></canvas>
+
+            </section>
+
+            <section id="variants">
+
+                <h2>Optimierungsvarianten</h2>
+
+                <div id="variantList">
+
+                    Noch keine Berechnung.
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+    <script src="config.js"></script>
+    <script src="patterns.js"></script>
+    <script src="calculations.js"></script>
+    <script src="optimizer.js"></script>
+    <script src="canvas.js"></script>
+    <script src="ui.js"></script>
+    <script src="app.js"></script>
+
+</body>
+
+</html>
