@@ -86,39 +86,24 @@ function drawTopView(ctx,variant,pallet){
 
     );
 
-    for(let row=0;row<variant.rows;row++){
+   }
+variant.boxes.forEach(box => {
 
-        for(let col=0;col<variant.cols;col++){
+    drawTopBox(
 
-            const x=
+        ctx,
 
-                margin+
+        margin + box.x * scale,
 
-                col*variant.boxLength*scale;
+        margin + box.y * scale,
 
-            const y=
+        box.length * scale,
 
-                margin+
+        box.width * scale
 
-                row*variant.boxWidth*scale;
+    );
 
-            drawTopBox(
-
-                ctx,
-
-                x,
-
-                y,
-
-                variant.boxLength*scale,
-
-                variant.boxWidth*scale
-
-            );
-
-        }
-
-    }
+});
 
 }
 // =====================================
