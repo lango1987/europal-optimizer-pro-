@@ -1,63 +1,55 @@
 /*
-=========================================
+==================================================
  Europal Optimizer Pro
- Version 1.0
  Konfiguration
-=========================================
+==================================================
 */
 
 const APP = {
-
     name: "Europal Optimizer Pro",
-
-    version: "1.0.0"
-
+    version: "0.1.0"
 };
 
 const PALLETS = {
 
     euro: {
-
+        id: "euro",
         name: "Europalette",
-
         length: 1200,
-
         width: 800,
-
         height: 144
-
     },
 
     industry: {
-
+        id: "industry",
         name: "Industriepalette",
-
         length: 1200,
-
         width: 1000,
-
         height: 144
-
     }
 
 };
 
-const DEFAULTS = {
+const SETTINGS = {
 
-    maxHeight: 1800,
+    defaultPallet: "euro",
 
-    weight: 0
+    defaultMaxHeight: 1800,
+
+    optimization: "balanced"
 
 };
 
 const COLORS = {
 
-    palletBorder: "#444",
+    pallet: "#555",
 
     carton: "#4CAF50",
 
     cartonBorder: "#2E7D32",
 
-    selected: "#1565c0"
+    background: "#EEF2F7",
+
+    selected: "#1565C0"
 
 };
