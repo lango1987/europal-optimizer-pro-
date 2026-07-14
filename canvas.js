@@ -465,7 +465,6 @@ function drawIsoPallet(
 /* ===========================================
    Isometrischer Karton
 =========================================== */
-
 function drawIsoBox(
     ctx,
     x,
@@ -475,6 +474,212 @@ function drawIsoBox(
     h,
     rotation
 ){
+
+    const depth = h * 0.15;
+
+
+    // ----------------------------
+    // Schatten
+    // ----------------------------
+
+    ctx.fillStyle = COLORS.shadow;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x - w + 8,
+        y + w/2 + h + 8
+    );
+
+    ctx.lineTo(
+        x + l - w + 8,
+        y + l/2 + w/2 + h + 8
+    );
+
+    ctx.lineTo(
+        x + l + 8,
+        y + l/2 + h + 8
+    );
+
+    ctx.lineTo(
+        x + 8,
+        y + h + 8
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+
+    // ----------------------------
+    // Oberseite
+    // ----------------------------
+
+    ctx.fillStyle = COLORS.boxTop;
+
+    ctx.strokeStyle = COLORS.boxBorder;
+
+    ctx.lineWidth = 1.5;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(x,y);
+
+    ctx.lineTo(
+        x+l,
+        y+l/2
+    );
+
+    ctx.lineTo(
+        x+l-w,
+        y+l/2+w/2
+    );
+
+    ctx.lineTo(
+        x-w,
+        y+w/2
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+    // ----------------------------
+    // Linke Vorderseite
+    // ----------------------------
+
+    ctx.fillStyle = COLORS.boxFront;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x-w,
+        y+w/2
+    );
+
+    ctx.lineTo(
+        x+l-w,
+        y+l/2+w/2
+    );
+
+    ctx.lineTo(
+        x+l-w,
+        y+l/2+w/2+h
+    );
+
+    ctx.lineTo(
+        x-w,
+        y+w/2+h
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+    // ----------------------------
+    // Rechte Seite
+    // ----------------------------
+
+    ctx.fillStyle = COLORS.boxSide;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x+l,
+        y+l/2
+    );
+
+    ctx.lineTo(
+        x+l-w,
+        y+l/2+w/2
+    );
+
+    ctx.lineTo(
+        x+l-w,
+        y+l/2+w/2+h
+    );
+
+    ctx.lineTo(
+        x+l,
+        y+l/2+h
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+
+    // ----------------------------
+    // Kartonband
+    // ----------------------------
+
+    ctx.strokeStyle="#8B7355";
+
+    ctx.lineWidth=1;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        x-w/2,
+        y+w/4
+    );
+
+    ctx.lineTo(
+        x+l-w/2,
+        y+l/2+w/4
+    );
+
+
+    ctx.stroke();
+
+
+
+    // ----------------------------
+    // Drehung anzeigen
+    // ----------------------------
+
+    if(rotation===90){
+
+        ctx.strokeStyle="#1976D2";
+
+        ctx.lineWidth=2;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            y+5
+        );
+
+        ctx.lineTo(
+            x+l,
+            y+l/2+5
+        );
+
+        ctx.stroke();
+
+    }
+
+}
+
 
     // Schatten
 
