@@ -2,15 +2,11 @@
 ==================================================
  Europal Optimizer Pro
  app.js
- Version 1.0
 ==================================================
 */
 
 
 let currentResult = null;
-
-
-
 
 
 
@@ -22,139 +18,62 @@ let currentResult = null;
 function startOptimization(){
 
 
-
     const job = {
-
 
 
         pallet:{
 
 
-
-            length:
-
-            Number(
-
-                document.getElementById(
-
-                    "palletLength"
-
-                ).value
-
+            length:Number(
+                document.getElementById("palletLength").value
             ),
 
 
-
-            width:
-
-            Number(
-
-                document.getElementById(
-
-                    "palletWidth"
-
-                ).value
-
+            width:Number(
+                document.getElementById("palletWidth").value
             ),
 
 
-
-            height:
-
-            Number(
-
-                document.getElementById(
-
-                    "palletHeight"
-
-                ).value
-
+            height:Number(
+                document.getElementById("palletHeight").value
             )
 
 
-
         },
-
-
-
-
 
 
 
         box:{
 
 
-
-            length:
-
-            Number(
-
-                document.getElementById(
-
-                    "boxLength"
-
-                ).value
-
+            length:Number(
+                document.getElementById("boxLength").value
             ),
 
 
-
-            width:
-
-            Number(
-
-                document.getElementById(
-
-                    "boxWidth"
-
-                ).value
-
+            width:Number(
+                document.getElementById("boxWidth").value
             ),
 
 
-
-            height:
-
-            Number(
-
-                document.getElementById(
-
-                    "boxHeight"
-
-                ).value
-
+            height:Number(
+                document.getElementById("boxHeight").value
             )
-
 
 
         },
 
 
 
-
-
-
-
         settings:{
 
 
-
-            maxHeight:
-
-            Number(
-
-                document.getElementById(
-
-                    "maxHeight"
-
-                ).value
-
+            maxHeight:Number(
+                document.getElementById("maxHeight").value
             )
 
 
-
         }
-
 
 
     };
@@ -162,37 +81,11 @@ function startOptimization(){
 
 
 
+    currentResult = optimize(job)[0];
 
 
 
-
-
-    const result =
-
-        optimize(
-
-            job
-
-        );
-
-
-
-
-
-
-
-    currentResult = result[0];
-
-
-
-    currentResult.pallet =
-
-        job.pallet;
-
-
-
-
-
+    currentResult.pallet = job.pallet;
 
 
 
@@ -207,7 +100,6 @@ function startOptimization(){
     );
 
 
-
 }
 
 
@@ -216,23 +108,15 @@ function startOptimization(){
 
 
 
-
-
 // ======================================
-// Draufsicht
+// Ansicht Buttons
 // ======================================
 
 
 function showTop(){
 
 
-
-    setView(
-
-        "top"
-
-    );
-
+    setView("top");
 
 
 }
@@ -243,27 +127,10 @@ function showTop(){
 
 
 
+function showLayer(layer){
 
 
-// ======================================
-// Lage anzeigen
-// ======================================
-
-
-function showLayer(
-
-    layer
-
-){
-
-
-
-    setLayer(
-
-        layer
-
-    );
-
+    setLayer(layer);
 
 
 }
@@ -272,30 +139,15 @@ function showLayer(
 
 
 
-
-
-
-
-// ======================================
-// 3D
-// ======================================
 
 
 function show3D(){
 
 
-
-    setView(
-
-        "3d"
-
-    );
-
+    setView("3d");
 
 
 }
-
-
 
 
 
@@ -308,30 +160,16 @@ function show3D(){
 // ======================================
 
 
-window.onload = function(){
+window.addEventListener(
+
+"load",
+
+function(){
 
 
-
-    const canvas =
-
-        document.getElementById(
-
-            "canvas"
-
-        );
+    initCanvas();
 
 
+}
 
-    if(canvas){
-
-
-
-        initCanvas();
-
-
-
-    }
-
-
-
-};
+);
