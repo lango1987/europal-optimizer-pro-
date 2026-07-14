@@ -1,42 +1,43 @@
 /*
-=========================================
+==================================================
  Europal Optimizer Pro
- Packmuster
-=========================================
+ Patterns
+ Version 2.0
+==================================================
 */
 
-const PATTERNS = [
-
-    {
-        id: "standard",
-        name: "Standard",
-        description: "Alle Kartons gleich ausgerichtet",
-        stability: 8.0
-    },
-
-    {
-        id: "rotated",
-        name: "90° gedreht",
-        description: "Alle Kartons gedreht",
-        stability: 7.8
-    },
-
-    {
-        id: "brick",
-        name: "Kreuzverband",
-        description: "Versetzte Reihen für höhere Stabilität",
-        stability: 9.5
-    },
-
-    {
-        id: "mixed",
-        name: "Gemischte Anordnung",
-        description: "Kombination aus Standard und gedreht",
-        stability: 8.8
-    }
-
-];
-
 function getPatterns() {
-    return PATTERNS;
+
+    return [
+
+        {
+            id: "standard",
+            name: "Standard",
+            rotation: 0,
+            stability: 70
+        },
+
+        {
+            id: "rotated",
+            name: "90° gedreht",
+            rotation: 90,
+            stability: 75
+        },
+
+        {
+            id: "cross",
+            name: "Kreuzverband",
+            rotation: "alternate",
+            stability: 95
+        },
+
+        {
+            id: "block",
+            name: "Blockstapel",
+            rotation: 0,
+            stability: 90
+        }
+
+    ];
+
 }
