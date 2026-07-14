@@ -9,9 +9,7 @@
 
 <title>Europal Optimizer Pro</title>
 
-
 <link rel="stylesheet" href="style.css">
-
 
 </head>
 
@@ -25,42 +23,70 @@ Europal Optimizer Pro
 
 
 
+
+
 <div class="container">
 
+
+
+<!-- =========================
+     Eingabe
+========================= -->
 
 
 <div class="panel">
 
 
 <h2>
-Eingabe
+Paletten Eingabe
 </h2>
 
 
 
 <label>
-Palette Länge (mm)
+Paletten Länge (mm)
 </label>
 
-<input id="palletLength" value="1200">
+<input 
+id="palletLength"
+type="number"
+value="1200">
+
+
 
 
 
 <label>
-Palette Breite (mm)
+Paletten Breite (mm)
 </label>
 
-<input id="palletWidth" value="800">
+<input 
+id="palletWidth"
+type="number"
+value="800">
+
+
 
 
 
 <label>
-Palette Höhe (mm)
+Paletten Höhe (mm)
 </label>
 
-<input id="palletHeight" value="150">
+<input 
+id="palletHeight"
+type="number"
+value="150">
 
 
+
+
+
+
+
+<h2>
+Karton Eingabe
+</h2>
 
 
 
@@ -68,7 +94,12 @@ Palette Höhe (mm)
 Karton Länge (mm)
 </label>
 
-<input id="boxLength" value="400">
+<input
+id="boxLength"
+type="number"
+value="400">
+
+
 
 
 
@@ -76,7 +107,12 @@ Karton Länge (mm)
 Karton Breite (mm)
 </label>
 
-<input id="boxWidth" value="300">
+<input
+id="boxWidth"
+type="number"
+value="300">
+
+
 
 
 
@@ -84,17 +120,35 @@ Karton Breite (mm)
 Karton Höhe (mm)
 </label>
 
-<input id="boxHeight" value="200">
+<input
+id="boxHeight"
+type="number"
+value="200">
 
+
+
+
+
+
+
+<h2>
+Stapel
+</h2>
 
 
 
 
 <label>
-Max. Stapelhöhe (mm)
+Maximale Höhe (mm)
 </label>
 
-<input id="maxHeight" value="2200">
+
+<input
+id="maxHeight"
+type="number"
+value="2200">
+
+
 
 
 
@@ -102,9 +156,11 @@ Max. Stapelhöhe (mm)
 
 <button onclick="startOptimization()">
 
-Optimieren
+Optimierung starten
 
 </button>
+
+
 
 
 
@@ -112,11 +168,23 @@ Optimieren
 
 
 
+
+
+<h2>
+Ansicht
+</h2>
+
+
+
+
+
 <button onclick="showTop()">
 
-Draufsicht
+Gesamte Palette
 
 </button>
+
+
 
 
 
@@ -128,11 +196,15 @@ Lage 1
 
 
 
+
+
 <button onclick="showLayer(2)">
 
 Lage 2
 
 </button>
+
+
 
 
 
@@ -144,12 +216,21 @@ Lage 2
 
 
 
+
+
 </div>
 
 
 
 
 
+
+
+
+
+<!-- =========================
+     Canvas
+========================= -->
 
 
 <div class="view">
@@ -162,10 +243,22 @@ Lage 2
 
 
 
+
+
+
 </div>
 
 
 
+
+
+
+
+
+
+<!-- =========================
+     Scripts
+========================= -->
 
 
 <script src="optimizer.js"></script>
@@ -175,7 +268,7 @@ Lage 2
 <script src="app.js"></script>
 
 
-</body>
 
+</body>
 
 </html>
